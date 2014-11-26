@@ -6,16 +6,11 @@
  */
 
 import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.chombo.util.DoubleTable;
 import org.chombo.util.Utility;
 
-/**
- * Data for HMM
- * @author pranab
- *
- */
+
 public class HiddenMarkovModel {
 	private String[] states;
 	private String[] observations;
