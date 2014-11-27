@@ -1,6 +1,6 @@
 /*
  * avenir: Predictive analytic based on Hadoop Map Reduce
- * Author: Pranab Ghosh
+ * Author: Bikash Agrawal
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you
  * may not use this file except in compliance with the License. You may
@@ -44,7 +44,7 @@ import org.chombo.util.Utility;
 
 /**
  * Predicts hidden state sequence, given observation sequence and HMM  model
- * @author pranab
+ * @author Bikash
  *
  */
 public class ViterbiStatePredictor extends Configured implements Tool {
@@ -81,7 +81,7 @@ public class ViterbiStatePredictor extends Configured implements Tool {
 	}
 	
 	/**
-	 * @author pranab
+	 * @author Bikash
 	 *
 	 */
 	public static class StatePredictionMapper extends Mapper<LongWritable, Text, NullWritable, Text> {
