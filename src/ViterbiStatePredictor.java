@@ -19,6 +19,7 @@
 
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -63,7 +64,7 @@ public class ViterbiStatePredictor extends Configured implements Tool {
         //FileInputFormat.addInputPath(job, new Path(" hdfs://localhost:9000/user/bikash/fd/out.txt"));
         //FileOutputFormat.setOutputPath(job, new Path(" hdfs://localhost:9000/user/bikash/fd/out/1"));
         FileInputFormat.setInputPaths(job, new Path("hdfs://localhost:9000/user/bikash/fd/out.txt"));
-    	FileOutputFormat.setOutputPath(job, new Path("hdfs://localhost:9000/user/bikash/fd/out/4"));
+    	FileOutputFormat.setOutputPath(job, new Path("hdfs://localhost:9000/user/bikash/fd/out/7"));
 
         Utility.setConfiguration(conf, "HMM");
         job.setMapperClass(ViterbiStatePredictor.StatePredictionMapper.class);
@@ -125,6 +126,7 @@ public class ViterbiStatePredictor extends Configured implements Tool {
         protected void map(LongWritable key, Text value, Context context)
         		throws IOException, InterruptedException {
         	items  =  value.toString().split(fieldDelimRegex);
+        	System.out.println("ITEMS --> " + value.toString());
         	decoder.initialize(items.length - skipFieldCount);
         	
         	//build state sequence probability matrix and state pointer matrix
@@ -133,14 +135,14 @@ public class ViterbiStatePredictor extends Configured implements Tool {
         	}
         	
         	//state sequence
-        	String[] states = decoder.getStateSequence();
-        	
+        	String[] states = decoder.getStateSequence(); // hidden states [N, L, N, H, H, H, N, L, N, L, N, L, L, N]
+        
         	stBld.delete(0, stBld.length());
         	stBld.append(items[idFieldIndex]);
         	if (outputStateOnly) {
         		//states only
 	        	for (int i = states.length - 1; i >= 0; --i) {
-	        		stBld.append(fieldDelim).append(states[i]);
+	        		stBld.append(fieldDelim).append(states[i]); //append , and make a string of hidden states
 	        	}
         	} else {
         		//observation followed by state
@@ -148,7 +150,8 @@ public class ViterbiStatePredictor extends Configured implements Tool {
 	        		stBld.append(fieldDelim).append(items[j]).append(subFieldDelim).append(states[i]);
 	        	}
         	}
-        	outVal.set(stBld.toString());
+        	outVal.set(stBld.toString()); //outVal  --> R9L63ZXYH9,L,L,N,N,L,L,L,L,L,H,H
+        	
    			context.write(NullWritable.get(),outVal);
         }
         

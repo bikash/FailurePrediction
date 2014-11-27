@@ -79,7 +79,7 @@ public class ViterbiDecoder {
 			}
 			processed = true;
 		} else {
-			//iterative for subsequent using prevoious state path probability 
+			//iterative for subsequent using previous state path probability 
 			for (int stateIndx = 0; stateIndx < numStates; ++stateIndx) {
 				maxPathProb  = 0;
 				maxPathProbStateIndx = 0;
