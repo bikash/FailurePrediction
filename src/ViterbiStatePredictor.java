@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -48,22 +49,31 @@ import org.chombo.util.Utility;
 public class ViterbiStatePredictor extends Configured implements Tool {
 	@Override
 	public int run(String[] args) throws Exception {
+		
+		
         Job job = new Job(getConf());
         String jobName = "Markov hidden state sequence predictor";
         job.setJobName(jobName);
-        
+        Configuration conf = job.getConfiguration();
+        conf.set("conf.path","/home/bikash/repos/FailurePrediction/jar/HMM.properties");
         job.setJarByClass(ViterbiStatePredictor.class);
 
-        FileInputFormat.addInputPath(job, new Path(args[0]));
-        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+//        FileInputFormat.addInputPath(job, new Path(args[0]));
+//        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        //FileInputFormat.addInputPath(job, new Path(" hdfs://localhost:9000/user/bikash/fd/out.txt"));
+        //FileOutputFormat.setOutputPath(job, new Path(" hdfs://localhost:9000/user/bikash/fd/out/1"));
+        FileInputFormat.setInputPaths(job, new Path("hdfs://localhost:9000/user/bikash/fd/out.txt"));
+    	FileOutputFormat.setOutputPath(job, new Path("hdfs://localhost:9000/user/bikash/fd/out/4"));
 
-        Utility.setConfiguration(job.getConfiguration(), "avenir");
+        Utility.setConfiguration(conf, "HMM");
         job.setMapperClass(ViterbiStatePredictor.StatePredictionMapper.class);
 
         job.setOutputKeyClass(NullWritable.class);
         job.setOutputValueClass(Text.class);
 
         job.setNumReduceTasks(0);
+        
+ 
 
         int status =  job.waitForCompletion(true) ? 0 : 1;
         return status;
@@ -101,8 +111,10 @@ public class ViterbiStatePredictor extends Configured implements Tool {
             idFieldIndex = conf.getInt("id.field.ordinal", 0);
             outputStateOnly = conf.getBoolean("output.state.only", true);
             subFieldDelim = conf.get("sub.field.delim", ":");
-            
+            String subFieldDelim1 = conf.get("hmm.model.path", "");
+            System.out.println(subFieldDelim1);
         	List<String> lines = Utility.getFileLines(conf, "hmm.model.path");
+        	System.out.println(lines);
         	model = new HiddenMarkovModel(lines,  LOG);
         	decoder = new ViterbiDecoder(model, LOG);
         }
