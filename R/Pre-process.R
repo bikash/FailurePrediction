@@ -246,6 +246,8 @@ names(stts) <- paste("St", (1:4), sep="-")
 qplot(date,value,data=dfu,geom="line",
       main = paste("States", paste(names(stts), stts, collapse=": "), collapse="; "),
       ylab = "State Probabilities") + 
-  facet_grid(variable ~ ., scales="free_y") + theme_bw()
+  facet_grid(variable ~ ., scales="free_y") + theme_bw() + geom_line()
 
 
+#p <- ggplot(dfu, aes(x = date, y = value, color = variable))
+#p + geom_line() + ylab("y")
