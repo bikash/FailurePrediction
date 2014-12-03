@@ -127,6 +127,8 @@ dev.off()
 #dir = "/Users/bikash/repos/FailurePrediction/R" # path for macbook
 dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
 setwd(dir)
+
+
 ##Plot number of observation Error Vs time
 Data1 = read.table("file/error_25.txt", 
                    sep=";", 
@@ -173,6 +175,25 @@ Data5 = read.table("file/error_29.txt",
 Data5$hour <- cut(as.POSIXlt( Data5$date,  origin="1970-01-01" ), breaks = "hour")
 ts5 <- ddply(Data5, .(hour),getcount)
 
+## d data from haisen22
+Data6 = read.table("file/error_22.txt", 
+                   sep=";", 
+                   col.names=c("date",  "status", "ErrorType", "Node"), 
+                   fill=FALSE, 
+                   strip.white=TRUE)
+Data6$hour <- cut(as.POSIXlt( Data6$date,  origin="1970-01-01" ), breaks = "hour")
+ts6 <- ddply(Data6, .(hour),getcount)
+
+
+## d data from haisen20
+Data7 = read.table("file/error_20.txt", 
+                   sep=";", 
+                   col.names=c("date",  "status", "ErrorType", "Node"), 
+                   fill=FALSE, 
+                   strip.white=TRUE)
+Data7$hour <- cut(as.POSIXlt( Data7$date,  origin="1970-01-01" ), breaks = "hour")
+ts7 <- ddply(Data7, .(hour),getcount)
+
 ## Plot graph for Error of haisen25
 plot(ts1$hour, ts1$count, ylim=range(0, 100), type='o', xlim=range(0,44) , xlab="Date", ylab="# of errors", xaxt="n")
 
@@ -191,5 +212,35 @@ ggplot( sp500LRdf, aes(Date) ) +
   labs( title = "S&P 500 log Returns")
 
 mod <- depmix(response = ErrorType ~ 1, data = Data1, nstates = 2,trstart = runif(4))
+
+
+## Merge all data 
+date = unlist(list(Data1$date, Data2$date, Data6$date, Data7$date))
+error = unlist(list(Data1$ErrorType, Data2$ErrorType, Data6$ErrorType, Data7$ErrorType))
+data <- data.frame(date,error)
+head(data) ## date and error
+fmx <- fit(depmix(error ~ 1, family = poisson(), nstates = 4, data = data), verbose = FALSE)
+summary(fmx)
+print(fmx)
+probs <- posterior(fmx)             # Compute probability of being in each state
+head(probs)
+# Lets change the name
+colnames(probs)[2:5] <- paste("P",1:4, sep="-")
+# Create dta.frame
+dfu <- cbind(data[,c(1,2)], probs[,2:5])
+# to Long format
+dfu <- melt(dfu,id="date", )
+
+# Get the states values
+stts<-round(getpars(fmx)[seq(43, by=2, length=6)],1)
+
+# Change the names
+names(stts) <- paste("St", (1:4), sep="-")
+
+# Plot the data along with the time series of probabilities
+qplot(date,value,data=dfu,geom="line",
+      main = paste("States", paste(names(stts), stts, collapse=": "), collapse="; "),
+      ylab = "State Probabilities") + 
+  facet_grid(variable ~ ., scales="free_y") + theme_bw()
 
 
