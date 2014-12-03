@@ -124,7 +124,8 @@ dev.off()
 # Description:..................
 #
 ######################################################################
-dir = "/Users/bikash/repos/FailurePrediction/R" 
+#dir = "/Users/bikash/repos/FailurePrediction/R" # path for macbook
+dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
 setwd(dir)
 ##Plot number of observation Error Vs time
 Data1 = read.table("file/error_25.txt", 
@@ -172,6 +173,23 @@ Data5 = read.table("file/error_29.txt",
 Data5$hour <- cut(as.POSIXlt( Data5$date,  origin="1970-01-01" ), breaks = "hour")
 ts5 <- ddply(Data5, .(hour),getcount)
 
+## Plot graph for Error of haisen25
+plot(ts1$hour, ts1$count, ylim=range(0, 100), type='o', xlim=range(0,44) , xlab="Date", ylab="# of errors", xaxt="n")
 
+a = list(Data1$date)
+b = list(Data1$ErrorType)
+df = matrix(c(unlist(a),unlist(b)),ncol=2,byrow=F)
+ep <- endpoints(Data1, on = "hours", k = 1)
+dfLR <- df[ep[2:(length(ep)-1)],]
+sp500LRdf <- data.frame(dfLR)
+sp500LRdf$logret <- log(dfLR[,2]) - lag(log(dfLR[,2]))
+
+sp500LRdf$X1 <- as.POSIXct(sp500LRdf$X1, tz="GMT")
+sp500LRdf$Date <-as.Date(row.names(sp500LRdf$X1),"%Y-%m-%d")
+ggplot( sp500LRdf, aes(Date) ) + 
+  geom_line( aes( y = logret ) ) +
+  labs( title = "S&P 500 log Returns")
+
+mod <- depmix(response = ErrorType ~ 1, data = Data1, nstates = 2,trstart = runif(4))
 
 
