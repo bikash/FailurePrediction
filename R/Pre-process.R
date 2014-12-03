@@ -44,26 +44,26 @@ Data3 = read.table("file/error_27.txt",
                    col.names=c("date",  "status", "ErrorType", "Node"), 
                    fill=FALSE, 
                    strip.white=TRUE)
-Data3$day <- cut(as.POSIXlt( Data3$date,  origin="1970-01-01" ), breaks = "day")
-ts3 <- ddply(Data3, .(day),getcount)
-
-## Data from haisen 28
-Data4 = read.table("file/error_28.txt", 
-                   sep=";", 
-                   col.names=c("date",  "status", "ErrorType", "Node"), 
-                   fill=FALSE, 
-                   strip.white=TRUE)
-Data4$day <- cut(as.POSIXlt( Data4$date,  origin="1970-01-01" ), breaks = "day")
-ts4 <- ddply(Data4, .(day),getcount)
-
-## Data from haisen 29
-Data5 = read.table("file/error_29.txt", 
-                   sep=";", 
-                   col.names=c("date",  "status", "ErrorType", "Node"), 
-                   fill=FALSE, 
-                   strip.white=TRUE)
-Data5$day <- cut(as.POSIXlt( Data5$date,  origin="1970-01-01" ), breaks = "day")
-ts5 <- ddply(Data5, .(day),getcount)
+  Data3$day <- cut(as.POSIXlt( Data3$date,  origin="1970-01-01" ), breaks = "day")
+  ts3 <- ddply(Data3, .(day),getcount)
+  
+  ## Data from haisen 28
+  Data4 = read.table("file/error_28.txt", 
+                     sep=";", 
+                     col.names=c("date",  "status", "ErrorType", "Node"), 
+                     fill=FALSE, 
+                     strip.white=TRUE)
+  Data4$day <- cut(as.POSIXlt( Data4$date,  origin="1970-01-01" ), breaks = "day")
+  ts4 <- ddply(Data4, .(day),getcount)
+  
+  ## Data from haisen 29
+  Data5 = read.table("file/error_29.txt", 
+                     sep=";", 
+                     col.names=c("date",  "status", "ErrorType", "Node"), 
+                     fill=FALSE, 
+                     strip.white=TRUE)
+  Data5$day <- cut(as.POSIXlt( Data5$date,  origin="1970-01-01" ), breaks = "day")
+  ts5 <- ddply(Data5, .(day),getcount)
 
 # plot graph
 x1 = c(1:21)
@@ -197,10 +197,11 @@ ts7 <- ddply(Data7, .(hour),getcount)
 ## Plot graph for Error of haisen25
 plot(ts1$hour, ts1$count, ylim=range(0, 100), type='o', xlim=range(0,44) , xlab="Date", ylab="# of errors", xaxt="n")
 
-a = list(Data1$date)
-b = list(Data1$ErrorType)
+a = list(ts1$date)
+#b = list(Data1$ErrorType)
+b = list(ts1$count)
 df = matrix(c(unlist(a),unlist(b)),ncol=2,byrow=F)
-ep <- endpoints(Data1, on = "hours", k = 1)
+ep <- endpoints(ts1, on = "hours", k = 1)
 dfLR <- df[ep[2:(length(ep)-1)],]
 sp500LRdf <- data.frame(dfLR)
 sp500LRdf$logret <- log(dfLR[,2]) - lag(log(dfLR[,2]))
@@ -215,8 +216,10 @@ mod <- depmix(response = ErrorType ~ 1, data = Data1, nstates = 2,trstart = runi
 
 
 ## Merge all data 
-date = unlist(list(Data1$date, Data2$date, Data6$date, Data7$date))
-error = unlist(list(Data1$ErrorType, Data2$ErrorType, Data6$ErrorType, Data7$ErrorType))
+date = unlist(list(ts1$hour, ts2$hour, ts6$hour, ts7$hour))
+#error = unlist(list(Datat1$ErrorType, Data2$ErrorType, Data6$ErrorType, Data7$ErrorType))
+error = unlist(list(ts1$count, ts2$count, ts6$count, ts7$count))
+
 data <- data.frame(date,error)
 head(data) ## date and error
 fmx <- fit(depmix(error ~ 1, family = poisson(), nstates = 4, data = data), verbose = FALSE)
@@ -226,13 +229,15 @@ probs <- posterior(fmx)             # Compute probability of being in each state
 head(probs)
 # Lets change the name
 colnames(probs)[2:5] <- paste("P",1:4, sep="-")
+
 # Create dta.frame
 dfu <- cbind(data[,c(1,2)], probs[,2:5])
 # to Long format
 dfu <- melt(dfu,id="date", )
 
+head(dfu)
 # Get the states values
-stts<-round(getpars(fmx)[seq(43, by=2, length=6)],1)
+stts<-round(getpars(fmx)[seq(21, by=1, length=4)],1)
 
 # Change the names
 names(stts) <- paste("St", (1:4), sep="-")
