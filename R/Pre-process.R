@@ -9,7 +9,7 @@ library(TTR) # For downloading SP500 index
 library(ggplot2)
 library(reshape2)
 library(xts)
-Data1 = read.table("/home/bikash/Dropbox/data/file/error_25.txt", 
+Data1 = read.table("file/error_25.txt", 
                    sep=";", 
                    col.names=c("date",  "status", "ErrorType", "Node"), 
                    fill=FALSE, 
@@ -20,7 +20,7 @@ Output1 <- ddply(Data1, .(day),getobsveration)
 Sys.setenv(tz = "UTC")
 
 ##Plot number of observation Error Vs time
-Data1 = read.table("/home/bikash/Dropbox/data/file/error_25.txt", 
+Data1 = read.table("file/error_25.txt", 
                    sep=";", 
                    col.names=c("date",  "status", "ErrorType", "Node"), 
                    fill=FALSE, 
@@ -30,7 +30,7 @@ getcount <- function(Df) { c(count = length(Df$ErrorType))  }
 ts1 <- ddply(Data1, .(day),getcount)
 
 ## Data from haisen 26
-Data2 = read.table("/home/bikash/Dropbox/data/file/error_26.txt", 
+Data2 = read.table("file/error_26.txt", 
                    sep=";", 
                    col.names=c("date",  "status", "ErrorType", "Node"), 
                    fill=FALSE, 
@@ -39,7 +39,7 @@ Data2$day <- cut(as.POSIXlt( Data2$date,  origin="1970-01-01" ), breaks = "day")
 ts2 <- ddply(Data2, .(day),getcount)
 
 ## Data from haisen 27
-Data3 = read.table("/home/bikash/Dropbox/data/file/error_27.txt", 
+Data3 = read.table("file/error_27.txt", 
                    sep=";", 
                    col.names=c("date",  "status", "ErrorType", "Node"), 
                    fill=FALSE, 
@@ -48,7 +48,7 @@ Data3$day <- cut(as.POSIXlt( Data3$date,  origin="1970-01-01" ), breaks = "day")
 ts3 <- ddply(Data3, .(day),getcount)
 
 ## Data from haisen 28
-Data4 = read.table("/home/bikash/Dropbox/data/file/error_28.txt", 
+Data4 = read.table("file/error_28.txt", 
                    sep=";", 
                    col.names=c("date",  "status", "ErrorType", "Node"), 
                    fill=FALSE, 
@@ -57,7 +57,7 @@ Data4$day <- cut(as.POSIXlt( Data4$date,  origin="1970-01-01" ), breaks = "day")
 ts4 <- ddply(Data4, .(day),getcount)
 
 ## Data from haisen 29
-Data5 = read.table("/home/bikash/Dropbox/data/file/error_29.txt", 
+Data5 = read.table("file/error_29.txt", 
                    sep=";", 
                    col.names=c("date",  "status", "ErrorType", "Node"), 
                    fill=FALSE, 
@@ -84,7 +84,7 @@ x = ts1$day
 
 
 ## Plot graph for Error vs time
-pdf("/home/bikash/Dropbox/data/graph/obs.pdf",bg="white")
+pdf("graph/obs.pdf",bg="white")
 #g_range <- range(0, y1, y2, y3, y4, y5)
 
 g_range <- range(0, 100)
@@ -124,9 +124,10 @@ dev.off()
 # Description:..................
 #
 ######################################################################
-
+dir = "/Users/bikash/repos/FailurePrediction/R" 
+setwd(dir)
 ##Plot number of observation Error Vs time
-Data1 = read.table("/home/bikash/Dropbox/data/file/error_25.txt", 
+Data1 = read.table("file/error_25.txt", 
                    sep=";", 
                    col.names=c("date",  "status", "ErrorType", "Node"), 
                    fill=FALSE, 
@@ -136,7 +137,7 @@ getcount <- function(Df) { c(count = length(Df$ErrorType))  }
 ts1 <- ddply(Data1, .(hour),getcount)
 
 ## Data from haisen 26
-Data2 = read.table("/home/bikash/Dropbox/data/file/error_26.txt", 
+Data2 = read.table("file/error_26.txt", 
                    sep=";", 
                    col.names=c("date",  "status", "ErrorType", "Node"), 
                    fill=FALSE, 
@@ -145,7 +146,7 @@ Data2$hour <- cut(as.POSIXlt( Data2$date,  origin="1970-01-01" ), breaks = "hour
 ts2 <- ddply(Data2, .(hour),getcount)
 
 ## Data from haisen 27
-Data3 = read.table("/home/bikash/Dropbox/data/file/error_27.txt", 
+Data3 = read.table("file/error_27.txt", 
                    sep=";", 
                    col.names=c("date",  "status", "ErrorType", "Node"), 
                    fill=FALSE, 
@@ -154,7 +155,7 @@ Data3$hour <- cut(as.POSIXlt( Data3$date,  origin="1970-01-01" ), breaks = "hour
 ts3 <- ddply(Data3, .(hour),getcount)
 
 ## Data from haisen 28
-Data4 = read.table("/home/bikash/Dropbox/data/file/error_28.txt", 
+Data4 = read.table("file/error_28.txt", 
                    sep=";", 
                    col.names=c("date",  "status", "ErrorType", "Node"), 
                    fill=FALSE, 
@@ -163,7 +164,7 @@ Data4$hour <- cut(as.POSIXlt( Data4$date,  origin="1970-01-01" ), breaks = "hour
 ts4 <- ddply(Data4, .(hour),getcount)
 
 ## Data from haisen 29
-Data5 = read.table("/home/bikash/Dropbox/data/file/error_29.txt", 
+Data5 = read.table("file/error_29.txt", 
                    sep=";", 
                    col.names=c("date",  "status", "ErrorType", "Node"), 
                    fill=FALSE, 
