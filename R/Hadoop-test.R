@@ -9,13 +9,16 @@
 dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
 setwd(dir)
 source("HMM.r")
-nSim          = 1000
-States        = c("Failed","Healthy")
-Symbols       = Data1$ErrorType
-len = length(Data1$ErrorType)
-transProbs    = matrix(c(.99,.01,.02,.98), c(length(States),length(States)), byrow=TRUE)
-emissionProbs = matrix(c(rep(1/len,len),c(rep(.1,5),.5)), c(length(States),length(Symbols)), byrow=TRUE)
+nSim          = 100
+States        = c("Healthy","Failure")
+Symbols       = c(1:6)
+len = 6
+transProbs    = matrix(c(.70,.30,.30,.70), c(length(States),length(States)), byrow=TRUE)
+
+emissionProbs = matrix(c(rep(1/len,len),c(0.9,0.1,0.1,0.1,0.1,0.1)), c(length(States),length(Symbols)), byrow=TRUE)
+
 hmm = initHMM(States, Symbols, transProbs=transProbs, emissionProbs=emissionProbs)
+
 sim = simHMM(hmm,nSim)
 vit = viterbi(hmm, sim$observation)
 f   = forward(hmm, sim$observation)
@@ -28,30 +31,30 @@ probObservations = (i + log(1+exp(j-i)))
 posterior = exp((f+b)-probObservations)
 x = list(hmm=hmm,sim=sim,vit=vit,posterior=posterior)
 
-readline("Plot simulated throws:\n")
+readline("Plot simulated failure:\n")
 mn1 = "Failure Prediction"
 xlb = "Error sequence."
 ylb = ""
 plot(x$sim$observation,ylim=c(-7.5,6),pch=3,main="Failure Prediction",xlab=xlb,ylab=ylb,bty="n",yaxt="n")
 axis(2,at=1:6)
 readline("Simulated, which die was used:\n")
-text(0,-1.2,adj=0,cex=.8,col="black","True: green = fair die")
+text(0,-1.2,adj=0,cex=.8,col="black","True: gray = healthy")
 for(i in 1:nSim)
 {
-  if(x$sim$states[i] == "Fair")
-    rect(i,-1,i+1,0, col = "green", border = NA)
+  if(x$sim$states[i] == "Healthy")
+    rect(i,-1,i+1,0, col = "gray", border = NA)
   else
-    rect(i,-1,i+1,0, col = "red", border = NA)   
+    rect(i,-1,i+1,0, col = "black", border = NA)   
 }
 
 readline("Most probable path (viterbi):\n")
 text(0,-3.2,adj=0,cex=.8,col="black","Most probable path")
 for(i in 1:nSim)
 { 
-  if(x$vit[i] == "Fair")
-    rect(i,-3,i+1,-2, col = "green", border = NA)
+  if(x$vit[i] == "Healthy")
+    rect(i,-3,i+1,-2, col = "gray", border = NA)
   else
-    rect(i,-3,i+1,-2, col = "red", border = NA)  
+    rect(i,-3,i+1,-2, col = "black", border = NA)  
 }
 
 readline("Differences:\n")

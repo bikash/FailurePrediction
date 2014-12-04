@@ -113,8 +113,6 @@ qplot(dfu$x,dfu$value,data=dfu,geom="line",
       ylab = "State Probabilities") + 
   facet_grid(variable ~ ., scales="free_y") + theme_bw() 
 
-
-
 # Plot observation of error
 pdf("graph/obs_error.pdf",bg="white")
 ## Summing or grouping data of similar date
