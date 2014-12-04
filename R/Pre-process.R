@@ -64,6 +64,24 @@ Data3 = read.table("file/error_27.txt",
                      strip.white=TRUE)
   Data5$day <- cut(as.POSIXlt( Data5$date,  origin="1970-01-01" ), breaks = "day")
   ts5 <- ddply(Data5, .(day),getcount)
+## d data from haisen22
+Data6 = read.table("file/error_22.txt", 
+                   sep=";", 
+                   col.names=c("date",  "status", "ErrorType", "Node"), 
+                   fill=FALSE, 
+                   strip.white=TRUE)
+Data6$day <- cut(as.POSIXlt( Data6$date,  origin="1970-01-01" ), breaks = "day")
+ts6 <- ddply(Data6, .(day),getcount)
+
+
+## d data from haisen20
+Data7 = read.table("file/error_20.txt", 
+                   sep=";", 
+                   col.names=c("date",  "status", "ErrorType", "Node"), 
+                   fill=FALSE, 
+                   strip.white=TRUE)
+Data7$day <- cut(as.POSIXlt( Data7$date,  origin="1970-01-01" ), breaks = "day")
+ts7 <- ddply(Data7, .(day),getcount)
 
 # plot graph
 x1 = c(1:21)
@@ -124,8 +142,8 @@ dev.off()
 # Description:..................
 #
 ######################################################################
-#dir = "/Users/bikash/repos/FailurePrediction/R" # path for macbook
-dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
+dir = "/Users/bikash/repos/FailurePrediction/R" # path for macbook
+#dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
 setwd(dir)
 
 
@@ -194,59 +212,45 @@ Data7 = read.table("file/error_20.txt",
 Data7$hour <- cut(as.POSIXlt( Data7$date,  origin="1970-01-01" ), breaks = "hour")
 ts7 <- ddply(Data7, .(hour),getcount)
 
-## Plot graph for Error of haisen25
-plot(ts1$hour, ts1$count, ylim=range(0, 100), type='o', xlim=range(0,44) , xlab="Date", ylab="# of errors", xaxt="n")
-
-a = list(ts1$date)
-#b = list(Data1$ErrorType)
-b = list(ts1$count)
-df = matrix(c(unlist(a),unlist(b)),ncol=2,byrow=F)
-ep <- endpoints(ts1, on = "hours", k = 1)
-dfLR <- df[ep[2:(length(ep)-1)],]
-sp500LRdf <- data.frame(dfLR)
-sp500LRdf$logret <- log(dfLR[,2]) - lag(log(dfLR[,2]))
-
-sp500LRdf$X1 <- as.POSIXct(sp500LRdf$X1, tz="GMT")
-sp500LRdf$Date <-as.Date(row.names(sp500LRdf$X1),"%Y-%m-%d")
-ggplot( sp500LRdf, aes(Date) ) + 
-  geom_line( aes( y = logret ) ) +
-  labs( title = "S&P 500 log Returns")
-
-mod <- depmix(response = ErrorType ~ 1, data = Data1, nstates = 2,trstart = runif(4))
-
-
 ## Merge all data 
-date = unlist(list(ts1$hour, ts2$hour, ts6$hour, ts7$hour))
+#date = unlist(list(ts1$hour, ts2$hour, ts3$hour, ts4$hour, ts5$hour, ts6$hour, ts7$hour))
+date = unlist(list(ts1$day, ts2$day, ts3$day, ts4$day, ts5$day, ts6$day, ts7$day))
 #error = unlist(list(Datat1$ErrorType, Data2$ErrorType, Data6$ErrorType, Data7$ErrorType))
-error = unlist(list(ts1$count, ts2$count, ts6$count, ts7$count))
+error = unlist(list(ts1$count, ts2$count, ts3$count, ts4$count, ts5$count, ts6$count, ts7$count))
 
+
+date = unlist(list(ts1$day, ts2$day, ts3$day))
+error = unlist(list(ts1$count, ts2$count, ts3$count))
 data <- data.frame(date,error)
+
 head(data) ## date and error
-fmx <- fit(depmix(error ~ 1, family = poisson(), nstates = 4, data = data), verbose = FALSE)
+fmx <- fit(depmix(error ~ 1, family = poisson(), nstates = 2, data = data), verbose = FALSE)
 summary(fmx)
 print(fmx)
 probs <- posterior(fmx)             # Compute probability of being in each state
 head(probs)
 # Lets change the name
-colnames(probs)[2:5] <- paste("P",1:4, sep="-")
+colnames(probs)[2:3] <- paste("P",1:2, sep="-")
 
 # Create dta.frame
-dfu <- cbind(data[,c(1,2)], probs[,2:5])
+dfu <- cbind(data[,c(1,2)], probs[,2:3])
 # to Long format
 dfu <- melt(dfu,id="date", )
 
 head(dfu)
 # Get the states values
-stts<-round(getpars(fmx)[seq(21, by=1, length=4)],1)
+stts<-round(getpars(fmx)[seq(7, by=1, length=2)],1)
 
 # Change the names
-names(stts) <- paste("St", (1:4), sep="-")
+names(stts) <- paste("St", (1:2), sep="-")
 
 # Plot the data along with the time series of probabilities
-qplot(date,value,data=dfu,geom="line",
+qplot(date,value,data=dfu,geom="point",
       main = paste("States", paste(names(stts), stts, collapse=": "), collapse="; "),
       ylab = "State Probabilities") + 
-  facet_grid(variable ~ ., scales="free_y") + theme_bw() + geom_line()
+  facet_grid(variable ~ ., scales="free_y") + theme_bw() 
+
+head(dfu)
 
 
 #p <- ggplot(dfu, aes(x = date, y = value, color = variable))
