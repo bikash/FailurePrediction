@@ -146,10 +146,11 @@ axis(side=1, at=x,   labels=format(a, '%Y-%m-%d'))
 grid(14,15,lty=2)
 legend ("topleft", legend =c("Number of Errors", "Failure"), 
         cex=0.8, col =c("black","red"),lwd=c(1,0), pch=c(0,18))
-
 dev.off()
 
 ## Calculate failure points
+
+
 
 
 
