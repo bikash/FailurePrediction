@@ -41,7 +41,7 @@ odpar
 fit$para$od
 # Runlength distribution:
 rdpar
-fit$para$rd
+fit$para$rd 
 
 
 
