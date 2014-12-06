@@ -1,4 +1,24 @@
 library("mhsmm")
+J <- 2 #H,F
+init <- c(0,0,1)
+
+0,1,2,3,4,5,6
+.50,.50
+.50,.50
+.08,.05,.01,.15,.12,.07,.21
+.10,.09,.08,.17,.15,.12,.11
+.80,.20
+
+
+J<-2
+initial <- c(0.8,0.2)
+P <- matrix(c(.5,.5,.5,.5),nrow=J)
+b <- list(mu=list(c(-3,0),c(1,2)),sigma=list(diag(2),matrix(c(4,2,2,3), ncol=2)))
+model <- hmmspec(init=initial, trans=P, parms.emission=b,dens.emission=dmvnorm.hsmm)
+model
+train <- simulate(model, nsim=300, seed=1234, rand.emis=rmvnorm.hsmm)
+plot(train,xlim=c(0,100))
+h1 = hmmfit(train,model,mstep=mstep.mvnorm)
 
 J <- 3
 init <- c(0,0,1)
