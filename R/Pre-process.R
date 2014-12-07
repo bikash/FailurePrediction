@@ -9,7 +9,7 @@ library(ggplot2)
 library(reshape2)
 library(xts)
 dir = "/Users/bikash/repos/FailurePrediction/R" # path for macbook
-#dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
+dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
 setwd(dir)
 ##Plot number of observation Error Vs time
 Data1 = read.table("file/error_25.txt", 
@@ -150,9 +150,42 @@ legend ("topleft", legend =c("Number of Errors", "Failure"),
         cex=0.8, col =c("black","red"),lwd=c(1,0), pch=c(0,18))
 dev.off()
 
-## Calculate failure points
+## Calculate failure points using vertibi algorithm to detect the state sequence in series
+library(hsmm)
+source("HMM.r")
+nSim          = 100
+States        = c(1,2) #c("Healthy","Failure")
+Symbols       = c(1:7) # possible combination of error
+len = 7
+transProbs    = matrix(c(.70,.30,.30,.70), c(length(States),length(States)), byrow=TRUE)
+emissionProbs = matrix(c(rep(1/len,len),c(0.9,0.1,0.1,0.1,0.1,0.1, 0.1)), c(length(States),length(Symbols)), byrow=TRUE)
+hmm = initHMM(States, Symbols, transProbs=transProbs, emissionProbs=emissionProbs)
+sim = simHMM(hmm,nSim)
+vit = viterbi(hmm, sim$observation)
+f   = forward(hmm, sim$observation)
+b   = backward(hmm, sim$observation)
+f[1,nSim]->i
+f[2,nSim]->j
 
+probObservations = (i + log(1+exp(j-i)))
+posterior = exp((f+b)-probObservations)
+x = list(hmm=hmm,sim=sim,vit=vit,posterior=posterior)
+## plot state along with time series data (error data)
 
-
-
-
+pdf("graph/failurePrediction.pdf",bg="white")
+readline("Plot simulated failure:\n")
+#mn1 = "Failure Prediction"
+xlb = "Error sequence"
+ylb = "Observation (type of errors)"
+plot(x$sim$observation,ylim=c(-1,7),pch=3,xlab=xlb,ylab=ylb,bty="n",yaxt="n")
+axis(2,at=1:7)
+readline("Simulated, when failure was occured:\n")
+text(0,-1.2,adj=0,cex=.8,col="black","True: gray = healthy")
+for(i in 1:nSim)
+{
+  if(x$sim$states[i] == 1)
+    rect(i,-1,i+1,0, col = "gray", border = NA)
+  else
+    rect(i,-1,i+1,0, col = "black", border = NA)   
+}
+dev.off()
