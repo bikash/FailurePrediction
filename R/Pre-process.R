@@ -8,7 +8,9 @@ library(TTR) # For downloading SP500 index
 library(ggplot2)
 library(reshape2)
 library(xts)
-
+dir = "/Users/bikash/repos/FailurePrediction/R" # path for macbook
+#dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
+setwd(dir)
 ##Plot number of observation Error Vs time
 Data1 = read.table("file/error_25.txt", 
                    sep=";", 
