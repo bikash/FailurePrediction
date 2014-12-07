@@ -167,6 +167,8 @@ dishonestCasino = function()
   vit = viterbi(hmm, sim$observation)
   f   = forward(hmm, sim$observation)
   b   = backward(hmm, sim$observation)
+  
+  baumWelch(hmm,sim$observation)
   # todo: probObservations is not generic!
   f[1,nSim]->i
   f[2,nSim]->j

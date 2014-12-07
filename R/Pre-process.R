@@ -158,7 +158,7 @@ States        = c(1,2) #c("Healthy","Failure")
 Symbols       = c(1:7) # possible combination of error
 len = 7
 transProbs    = matrix(c(.70,.30,.30,.70), c(length(States),length(States)), byrow=TRUE)
-emissionProbs = matrix(c(rep(1/len,len),c(0.9,0.1,0.1,0.1,0.1,0.1, 0.1)), c(length(States),length(Symbols)), byrow=TRUE)
+emissionProbs = matrix(c(rep(1/len,len),c(0.7,0.1,0.1,0.1,0.1,0.1, 0.9)), c(length(States),length(Symbols)), byrow=TRUE)
 hmm = initHMM(States, Symbols, transProbs=transProbs, emissionProbs=emissionProbs)
 sim = simHMM(hmm,nSim)
 vit = viterbi(hmm, sim$observation)
@@ -188,4 +188,18 @@ for(i in 1:nSim)
   else
     rect(i,-1,i+1,0, col = "black", border = NA)   
 }
+### state observation in hmm
+#addStates(x$sim$states)
 dev.off()
+
+
+
+J <- 2
+init <- c(1,0)
+P <- matrix(c(0,.1,.4,.5,0,.6),nrow=J)
+B <- list(mu=c(10,20),sigma=c(2,1.5))
+d <- data
+model <- hsmmspec(init,P,parms.emission=B,sojourn=d,dens.emission=dnorm.hsmm)
+train <- simulate(model,r=rnorm.hsmm,nsim=100,seed=123456)
+plot(train,xlim=c(0,400))
+
