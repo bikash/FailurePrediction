@@ -6,6 +6,8 @@ library(TTR) # For downloading SP500 index
 library(ggplot2)
 library(reshape2)
 library(xts)
+library(data.table)
+library(reshape)
 dir = "/Users/bikash/repos/FailurePrediction/R" # path for macbots1ok
 dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
 setwd(dir)
@@ -84,7 +86,8 @@ getData = function(merge=TRUE, hour=FALSE)
       ## Merge all data 
       date = unlist(list(ts1$day, ts2$day, ts3$day, ts4$day, ts5$day,ts6$day, ts7$day))
       error = unlist(list(ts1$count,ts2$count,ts3$count,ts4$count,ts5$count, ts6$count, ts7$count))
-      data <- data.frame(date,error)
+      obs = unlist(list(ts1$obs,ts2$obs,ts3$obs,ts4$obs,ts5$obs, ts6$obs, ts7$obs))
+      data <- data.frame(date,error,obs)
       ## Summing or grouping data of similar date
       data$error = strtoi(data$error)
       data = aggregate(error ~ date, data = data, sum)
@@ -92,4 +95,49 @@ getData = function(merge=TRUE, hour=FALSE)
   }
 }
 
+## function to get raw data
+## @param merge: if True merge all the data from different cluster
+getrawData = function()
+{
+    ## Merge all data 
+    date = unlist(list(Data1$date, Data2$date, Data3$date, Data4$date, Data5$date,Data6$date, Data7$date))
+    error = unlist(list(Data1$ErrorType,Data2$ErrorType,Data3$ErrorType,Data4$ErrorType,Data5$ErrorType, Data6$ErrorType, Data7$ErrorType))
+    data.errorType <- data.frame(date,error)
+    ## Summing or grouping data of similar date
+    #rawData <- by(error,date,function(x)paste(x,collapse=","))
+    dt <- data.table(data.errorType )
+    #rawData = dt[,paste(error,collapse=","),by=date]
+    rawData = dcast(dt, date ~ dt$error, fun.aggregate = sum, value.var = "error") 
+    #rawData = dt[,paste(error,collapse=","),by=date]
+    return (rawData)
+}
+
+getErrors <- function(Df) 
+{ 
+  c(a1 = sum(Df$y1),
+    a2 = sum(Df$y2),
+    a3 = sum(Df$y3),
+    a4 = sum(Df$y4),
+    a5 = sum(Df$y5),
+    a6 = sum(Df$y6)
+    )  
+}
+
+df = getrawData()
+
+##change column name
+cols <- c("date","y1","y2","y3","y4","y5","y6")
+colnames(df) <- cols
+
+### Aggregate per day
+df$day <- cut(as.POSIXlt( df$date,  origin="1970-01-01" ), breaks = "day")
+ErrorType <- ddply(df, .(day), getErrors)
+x = ErrorType$day
+
+
+
+
+
 getData()
+
+##Plot Error observation
