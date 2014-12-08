@@ -128,7 +128,7 @@ data <- data.frame(date,error)
 ## Summing or grouping data of similar date
 data$error = strtoi(data$error)
 data = aggregate(error ~ date, data = data, sum)
-obs=c(0,1,1,1,1,0,1,1,0,0,0,0,0,0,1,0,0,0,0,1,0) ## failure state
+obs=c(1,1,1,1,1,0,1,1,0,0,1,0,0,1,1,1,0,0,1,1,1) ## failure state
 x = data$date
 y = data$error
 ## Plot graph for Error vs time

@@ -23,8 +23,11 @@ sim = simHMM(hmm,nSim)
 vit = viterbi(hmm, sim$observation)
 f   = forward(hmm, sim$observation)
 b   = backward(hmm, sim$observation)
-vt = viterbiTraining(hmm,sim$observation)
+#vt = viterbiTraining(hmm,sim$observation)
 bw = baumWelch(hmm,sim$observation,10)
+hmm = initHMM(States, Symbols, transProbs=bw$hmm$transProbs, emissionProbs=bw$hmm$emissionProbs)
+sim = simHMM(hmm,5)
+
 print(bw$hmm)
 # todo: probObservations is not generic!
 f[1,nSim]->i
