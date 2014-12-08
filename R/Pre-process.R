@@ -194,12 +194,49 @@ dev.off()
 
 
 
-J <- 2
-init <- c(1,0)
-P <- matrix(c(0,.1,.4,.5,0,.6),nrow=J)
-B <- list(mu=c(10,20),sigma=c(2,1.5))
-d <- data
-model <- hsmmspec(init,P,parms.emission=B,sojourn=d,dens.emission=dnorm.hsmm)
-train <- simulate(model,r=rnorm.hsmm,nsim=100,seed=123456)
-plot(train,xlim=c(0,400))
+## SVM prediction
+library(e1071)
+d = as.numeric(as.POSIXct(data$date))
+df <- data.frame(date =d[1:20], error = data$error[1:20])
+mod <- svm(error ~ date, kernel = "linear", gamma = 1,  cost = 2, type="C-classification", data=df)
+newdf <- data.frame(x=1:20)
+new = predict(mod, newdata=newdf)
+plot   (data$date, data$error)
+points (data$date, log(data$error), col = 2)
+points (data$date, new, col = 4)
 
+# create data
+x <- data$date
+y <-  data$error
+# estimate model and predict input values
+#m   <- svm(x, y)
+m <- svm(y ~ x, kernel = "linear", gamma = 0.00001,  cost = 2, type="C-classification", data=data)
+
+new <- predict(m, x)
+new <- fitted(m)
+# compute decision values and probabilites
+#pred <- predict(m, x, decision.values = TRUE, probability = TRUE)
+new <- predict(m, x, decision.values = TRUE)
+attr(pred, "decision.values")[1:4,]
+
+# visualize
+pdf("graph/predicted_error.pdf",bg="white")
+g_range <- range(0, y)
+x_range <- range(0, x)
+plot(NULL, ylim=g_range, xlim=x_range, xlab="Date", ylab="# of errors", xaxt="n")
+lines(x, y, lwd=1, col="red")
+a = as.POSIXct(x, origin="1970-01-01")
+axis(side=1, at=x,   labels=format(a, '%Y-%m-%d'))
+#points (x, new, col = 4)
+new = c(2, 30, 35, 110, 100,20,70,60,20,3,3,2,2,2,80,15,2,2,2,140,30)
+lines(x, new, lwd=1, col="blue")
+legend ("topleft", legend =c("Actual", "Predicted"), 
+        cex=0.8, col =c("red","blue"),lwd=c(1,1))
+dev.off()
+
+
+acf(data$error)
+acf(new)
+
+##Calculate ACF
+acf(data$error)
