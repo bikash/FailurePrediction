@@ -9,7 +9,7 @@ library(xts)
 library(data.table)
 library(reshape)
 dir = "/Users/bikash/repos/FailurePrediction/R" # path for macbots1ok
-dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
+#dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
 setwd(dir)
 ##Plot number of observation Error Vs time
 Data1 = read.table("file/error_25.txt", 
@@ -132,7 +132,8 @@ colnames(df) <- cols
 ### Aggregate per day
 df$day <- cut(as.POSIXlt( df$date,  origin="1970-01-01" ), breaks = "day")
 ErrorType <- ddply(df, .(day), getErrors)
-x = ErrorType$day
+ErrorType <- data.frame(day=ErrorType$day[2:6], a1=ErrorType$a1[2:6], a2=ErrorType$a2[2:6], a3=ErrorType$a3[2:6], a4=ErrorType$a4[2:6], a5=ErrorType$a5[2:6], a6=ErrorType$a6[2:6])
+#x = ErrorType$day
 # visualize
 pdf("graph/toe.pdf",bg="white")
 df = matrix(c(ErrorType$a1, ErrorType$a2, ErrorType$a3, ErrorType$a4, ErrorType$a5, ErrorType$a6),
@@ -152,7 +153,7 @@ barplot(df1,                             # Data (bar heights) to plot
         ylim = c(0,200),
         font.lab=3)                             # Font to use for the axis labels: 1=plain text, 2=bold, 3=italic, 4=bold italic
 
-legend("topleft",                               # Add a legend to the plot
+legend("topright",                               # Add a legend to the plot
        legend=c( "Error 1","Error 2", "Error 3", "Error 4", "Error 5", "Error 6"),             # Text for the legend
        fill=c( "white","black",  "gray", "red","green","blue"))  
 
