@@ -9,13 +9,13 @@
 dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
 setwd(dir)
 source("HMM.r")
-nSim          = 100
+nSim          = 500
 States        = c("Healthy","Failure")
-Symbols       = c(1:6)
-len = 6
+Symbols       = c(1:7)
+len = 7
 transProbs    = matrix(c(.70,.30,.30,.70), c(length(States),length(States)), byrow=TRUE)
 
-emissionProbs = matrix(c(rep(1/len,len),c(0.9,0.1,0.1,0.1,0.1,0.1)), c(length(States),length(Symbols)), byrow=TRUE)
+emissionProbs = matrix(c(rep(1/len,len),c(0.8,0.1,0.1,0.1,0.1,0.1,0.9)), c(length(States),length(Symbols)), byrow=TRUE)
 
 hmm = initHMM(States, Symbols, transProbs=transProbs, emissionProbs=emissionProbs)
 
@@ -23,6 +23,9 @@ sim = simHMM(hmm,nSim)
 vit = viterbi(hmm, sim$observation)
 f   = forward(hmm, sim$observation)
 b   = backward(hmm, sim$observation)
+vt = viterbiTraining(hmm,sim$observation)
+bw = baumWelch(hmm,sim$observation,10)
+print(bw$hmm)
 # todo: probObservations is not generic!
 f[1,nSim]->i
 f[2,nSim]->j
@@ -36,7 +39,7 @@ mn1 = "Failure Prediction"
 xlb = "Error sequence."
 ylb = ""
 plot(x$sim$observation,ylim=c(-7.5,6),pch=3,main="Failure Prediction",xlab=xlb,ylab=ylb,bty="n",yaxt="n")
-axis(2,at=1:6)
+axis(2,at=1:7)
 readline("Simulated, which die was used:\n")
 text(0,-1.2,adj=0,cex=.8,col="black","True: gray = healthy")
 for(i in 1:nSim)
@@ -109,4 +112,7 @@ for(i in 1:nSim)
     rect(i,-7,i+1,-6, col = rgb(.9, .9, .9), border = NA)
   }
 }
+
+
+
 invisible(x)

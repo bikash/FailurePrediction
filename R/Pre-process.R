@@ -8,7 +8,7 @@ library(TTR) # For downloading SP500 index
 library(ggplot2)
 library(reshape2)
 library(xts)
-dir = "/Users/bikash/repos/FailurePrediction/R" # path for macbook
+dir = "/Users/bikash/repos/FailurePrediction/R" # path for macbots1ok
 dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
 setwd(dir)
 ##Plot number of observation Error Vs time
@@ -153,12 +153,12 @@ dev.off()
 ## Calculate failure points using vertibi algorithm to detect the state sequence in series
 library(hsmm)
 source("HMM.r")
-nSim          = 100
+nSim          = 300
 States        = c(1,2) #c("Healthy","Failure")
 Symbols       = c(1:7) # possible combination of error
 len = 7
 transProbs    = matrix(c(.70,.30,.30,.70), c(length(States),length(States)), byrow=TRUE)
-emissionProbs = matrix(c(rep(1/len,len),c(0.7,0.1,0.1,0.1,0.1,0.1, 0.9)), c(length(States),length(Symbols)), byrow=TRUE)
+emissionProbs = matrix( c(0.5,0.1,0.1,0.04,0.1,0.09,0.7,c(0.5,0.09,0.08,0.1,0.05,0.1, 0.9)), c(length(States),length(Symbols)), byrow=TRUE)
 hmm = initHMM(States, Symbols, transProbs=transProbs, emissionProbs=emissionProbs)
 sim = simHMM(hmm,nSim)
 vit = viterbi(hmm, sim$observation)
@@ -175,8 +175,8 @@ x = list(hmm=hmm,sim=sim,vit=vit,posterior=posterior)
 pdf("graph/failurePrediction.pdf",bg="white")
 readline("Plot simulated failure:\n")
 #mn1 = "Failure Prediction"
-xlb = "Error sequence"
-ylb = "Observation (type of errors)"
+xlb = "Time (in hours)"
+ylb = "Error sequence"
 plot(x$sim$observation,ylim=c(-1,7),pch=3,xlab=xlb,ylab=ylb,bty="n",yaxt="n")
 axis(2,at=1:7)
 readline("Simulated, when failure was occured:\n")
