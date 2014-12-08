@@ -123,42 +123,50 @@ getErrors <- function(Df)
     )  
 }
 
-df = getrawData()
+PloterrorType <- function ()
+{
+  df = getrawData()
+  
+  ##change column name
+  cols <- c("date","y1","y2","y3","y4","y5","y6")
+  colnames(df) <- cols
+  
+  ### Aggregate per day
+  df$day <- cut(as.POSIXlt( df$date,  origin="1970-01-01" ), breaks = "day")
+  ErrorType <- ddply(df, .(day), getErrors)
+  ErrorType <- data.frame(day=ErrorType$day[2:6], a1=ErrorType$a1[2:6], a2=ErrorType$a2[2:6], a3=ErrorType$a3[2:6], a4=ErrorType$a4[2:6], a5=ErrorType$a5[2:6], a6=ErrorType$a6[2:6])
 
-##change column name
-cols <- c("date","y1","y2","y3","y4","y5","y6")
-colnames(df) <- cols
+  # visualize
+  pdf("graph/toe.pdf",bg="white")
+  df = matrix(c(ErrorType$a1, ErrorType$a2, ErrorType$a3, ErrorType$a4, ErrorType$a5, ErrorType$a6),
+              nrow=length(ErrorType$day), ncol=6, 
+              dimnames=list(ErrorType$day, c( "Error 1","Error 2", "Error 3", "Error 4", "Error 5", "Error 6")))
+  
+  df1 = t(df)                                       
+  # SIMPLE BARPLOT
+  barplot(df1,                             # Data (bar heights) to plot
+          beside=TRUE,                            # Plot the bars beside one another; default is to plot stacked bars
+          names.arg=ErrorType$day,
+         # col=c( "black","black",  "gray", "red","green","blue"),                   # Color of the bars
+          border="black",                         # Color of the bar borders
+          #main=c("Performance with different type of input format"),      # Main title for the plot
+          xlab="Date",                       # X-axis label
+          ylab="# of errors",                      # Y-axis label
+          ylim = c(0,200),
+          density=c(120, 90, 70, 50, 30, 10),
+          font.lab=3)                             # Font to use for the axis labels: 1=plain text, 2=bold, 3=italic, 4=bold italic
+  
+  legend("topright",                               # Add a legend to the plot
+         legend=c( "Network connection","Memory overflow", "Security setting", "Java exception", "Java I/O error", "Namenode failure"),             # Text for the legend
+         density=c(90, 70, 50, 40, 30, 20),
+         #fill=c( "white","black",  "gray", "red","green","blue")
+         )  
+  
+  dev.off()
+}
 
-### Aggregate per day
-df$day <- cut(as.POSIXlt( df$date,  origin="1970-01-01" ), breaks = "day")
-ErrorType <- ddply(df, .(day), getErrors)
-ErrorType <- data.frame(day=ErrorType$day[2:6], a1=ErrorType$a1[2:6], a2=ErrorType$a2[2:6], a3=ErrorType$a3[2:6], a4=ErrorType$a4[2:6], a5=ErrorType$a5[2:6], a6=ErrorType$a6[2:6])
-#x = ErrorType$day
-# visualize
-pdf("graph/toe.pdf",bg="white")
-df = matrix(c(ErrorType$a1, ErrorType$a2, ErrorType$a3, ErrorType$a4, ErrorType$a5, ErrorType$a6),
-            nrow=length(ErrorType$day), ncol=6, 
-            dimnames=list(ErrorType$day, c( "Error 1","Error 2", "Error 3", "Error 4", "Error 5", "Error 6")))
 
-df1 = t(df)                                       
-# SIMPLE BARPLOT
-barplot(df1,                             # Data (bar heights) to plot
-        beside=TRUE,                            # Plot the bars beside one another; default is to plot stacked bars
-        names.arg=ErrorType$day,
-        col=c( "white","black",  "gray", "red","green","blue"),                   # Color of the bars
-        border="black",                         # Color of the bar borders
-        #main=c("Performance with different type of input format"),      # Main title for the plot
-        xlab="Date",                       # X-axis label
-        ylab="# of errors",                      # Y-axis label
-        ylim = c(0,200),
-        font.lab=3)                             # Font to use for the axis labels: 1=plain text, 2=bold, 3=italic, 4=bold italic
-
-legend("topright",                               # Add a legend to the plot
-       legend=c( "Error 1","Error 2", "Error 3", "Error 4", "Error 5", "Error 6"),             # Text for the legend
-       fill=c( "white","black",  "gray", "red","green","blue"))  
-
-dev.off()
-
+PloterrorType();
 getData()
 
 
