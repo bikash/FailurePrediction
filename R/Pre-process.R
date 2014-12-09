@@ -181,15 +181,35 @@ plot(x$sim$observation,ylim=c(-1,7),pch=3,xlab=xlb,ylab=ylb,bty="n",yaxt="n")
 axis(2,at=1:7)
 readline("Simulated, when failure was occured:\n")
 text(0,-1.2,adj=0,cex=.8,col="black","True: gray = healthy")
+j =1
+failure = rep(c(0:10))
 for(i in 1:nSim)
 {
   if(x$sim$states[i] == 1)
     rect(i,-1,i+1,0, col = "gray", border = NA)
-  else
+  else{ 
     rect(i,-1,i+1,0, col = "black", border = NA)   
+    failure[j]=i
+    j = j+1
+  }
 }
 ### state observation in hmm
 #addStates(x$sim$states)
+dev.off()
+
+pdf("graph/failurehist.pdf",bg="white")
+##Plot histogram for time between failures (TBF)
+len = length(failure)
+j = 1
+failur = rep(c(0:10))
+for(i in 2:len)
+{
+  failure[j] = failure[i] - failure[i-1]
+  j = j+1
+}
+failure[len]= 10
+hidden.states = x$sim$states ##1 healthy and 2 failure
+hist(failure, freq=FALSE, main="", xlab = "Time Between Failure (hour)")
 dev.off()
 
 

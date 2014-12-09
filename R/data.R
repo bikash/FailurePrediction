@@ -9,7 +9,7 @@ library(xts)
 library(data.table)
 library(reshape)
 dir = "/Users/bikash/repos/FailurePrediction/R" # path for macbots1ok
-#dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
+dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
 setwd(dir)
 ##Plot number of observation Error Vs time
 Data1 = read.table("file/error_25.txt", 
@@ -97,7 +97,7 @@ getData = function(merge=TRUE, hour=FALSE)
 
 ## function to get raw data
 ## @param merge: if True merge all the data from different cluster
-getrawData = function()
+getrawData = function(pivot =TRUE)
 {
     ## Merge all data 
     date = unlist(list(Data1$date, Data2$date, Data3$date, Data4$date, Data5$date,Data6$date, Data7$date))
@@ -107,7 +107,10 @@ getrawData = function()
     #rawData <- by(error,date,function(x)paste(x,collapse=","))
     dt <- data.table(data.errorType )
     #rawData = dt[,paste(error,collapse=","),by=date]
-    rawData = dcast(dt, date ~ dt$error, fun.aggregate = sum, value.var = "error") 
+    if(pivot)
+      rawData = dcast(dt, date ~ dt$error, fun.aggregate = sum, value.var = "error") 
+    else
+      rawData = df
     #rawData = dt[,paste(error,collapse=","),by=date]
     return (rawData)
 }
@@ -165,11 +168,13 @@ PloterrorType <- function ()
   dev.off()
 }
 
-
 PloterrorType();
 getData()
 
 
+df = getrawData()
+## Change column name
+cols <- c("date","y1","y2","y3","y4","y5","y6")
+colnames(df) <- cols
+## Plot Error observation
 
-
-##Plot Error observation
