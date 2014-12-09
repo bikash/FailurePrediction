@@ -209,8 +209,9 @@ for(i in 2:len)
 }
 failure[len]= 10
 hidden.states = x$sim$states ##1 healthy and 2 failure
-hist(failure, freq=FALSE, main="", xlab = "Time Between Failure (hour)")
+hist(failure, freq=FALSE, main="", xlab = "Time Between Failure (hour)", density = 70, angle = 45)
 dev.off()
+
 
 
 
