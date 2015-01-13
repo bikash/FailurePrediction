@@ -419,3 +419,5 @@ viterbiTrainingRecursion = function(hmm, observation)
 }
 
 
+
+dishonestCasino()

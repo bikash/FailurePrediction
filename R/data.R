@@ -9,7 +9,7 @@ library(xts)
 library(data.table)
 library(reshape)
 dir = "/Users/bikash/repos/FailurePrediction/R" # path for macbots1ok
-dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
+#dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
 setwd(dir)
 ##Plot number of observation Error Vs time
 Data1 = read.table("file/error_25.txt", 
@@ -168,8 +168,6 @@ PloterrorType <- function ()
   dev.off()
 }
 
-PloterrorType();
-getData()
 
 
 df = getrawData()

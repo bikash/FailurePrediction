@@ -9,7 +9,7 @@ library(ggplot2)
 library(reshape2)
 library(xts)
 dir = "/Users/bikash/repos/FailurePrediction/R" # path for macbots1ok
-dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
+#dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
 setwd(dir)
 ##Plot number of observation Error Vs time
 Data1 = read.table("file/error_25.txt", 
@@ -201,15 +201,15 @@ pdf("graph/failurehist.pdf",bg="white")
 ##Plot histogram for time between failures (TBF)
 len = length(failure)
 j = 1
-failur = rep(c(0:10))
+failure1 = rep(c(0:10))
 for(i in 2:len)
 {
-  failure[j] = failure[i] - failure[i-1]
+  failure1[j] = failure[i] - failure[i-1]
   j = j+1
 }
-failure[len]= 10
+failure1[len]= 10
 hidden.states = x$sim$states ##1 healthy and 2 failure
-hist(failure, freq=FALSE, main="", xlab = "Time Between Failure (hour)", density = 70, angle = 45)
+hist(failure1, freq=FALSE, main="", xlab = "Time Between Failure (hour)", density = 10, angle = 45)
 dev.off()
 
 
