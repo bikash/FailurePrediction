@@ -99,9 +99,17 @@ getData = function(merge=TRUE, hour=FALSE)
 ## @param merge: if True merge all the data from different cluster
 getrawData = function(pivot =TRUE)
 {
+    ## Fill empty slot with unfailure data
+    len = length(df$date)
+    #tseq <- seq(as.POSIXlt(df$date[1], origin="1970-01-01"), as.POSIXlt(df$date[len], origin="1970-01-01"), by="secs")
+    tseq <- seq(as.POSIXlt(1415724101, origin="1970-01-01"), as.POSIXlt(1417413321, origin="1970-01-01"), by="secs")
+    tseq=as.numeric(as.POSIXct(tseq))
+    error = 7
+    data.nonerror <- data.frame(tseq,error)
     ## Merge all data 
-    date = unlist(list(Data1$date, Data2$date, Data3$date, Data4$date, Data5$date,Data6$date, Data7$date))
-    error = unlist(list(Data1$ErrorType,Data2$ErrorType,Data3$ErrorType,Data4$ErrorType,Data5$ErrorType, Data6$ErrorType, Data7$ErrorType))
+    date = unlist(list(Data1$date, Data2$date, Data3$date, Data4$date, Data5$date,Data6$date, Data7$date,tseq))
+    error = unlist(list(Data1$ErrorType,Data2$ErrorType,Data3$ErrorType,Data4$ErrorType,Data5$ErrorType, Data6$ErrorType, Data7$ErrorType,data.nonerror$error))
+    
     data.errorType <- data.frame(date,error)
     ## Summing or grouping data of similar date
     #rawData <- by(error,date,function(x)paste(x,collapse=","))
@@ -172,7 +180,7 @@ PloterrorType <- function ()
 
 df = getrawData()
 ## Change column name
-cols <- c("date","y1","y2","y3","y4","y5","y6")
+cols <- c("date","y1","y2","y3","y4","y5","y6","y7") ## error 1 to 6 and 7 is non error event
 colnames(df) <- cols
 ## Plot Error observation
 
