@@ -8,8 +8,8 @@ library(reshape2)
 library(xts)
 library(data.table)
 library(reshape)
-dir = "/Users/bikash/repos/FailurePrediction/R" # path for macbots1ok
-#dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
+#dir = "/Users/bikash/repos/FailurePrediction/R" # path for macbots1ok
+dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
 setwd(dir)
 ##Plot number of observation Error Vs time
 Data1 = read.table("file/error_25.txt", 
@@ -175,4 +175,6 @@ df = getrawData()
 cols <- c("date","y1","y2","y3","y4","y5","y6")
 colnames(df) <- cols
 ## Plot Error observation
+
+### model HMM
 
