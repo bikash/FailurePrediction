@@ -261,8 +261,8 @@ library(HMM)
 #Define HMM Model
 TPM <- matrix(c(.95, .05, 
                 .1, .9), 2, byrow = TRUE)
-EPM <- matrix(c(0.01, 0.02, 0.02, 0.02, 0.02, 0.02, 0.99,
-                0.99, 0.01, 0.03, 0.03, 0.03, 0.001, 0.009), 2, byrow = TRUE)
+EPM <- matrix(c(0.00, 0.02, 0.02, 0.02, 0.02, 0.02, 0.99,
+                1, 0.00, 0.00, 0.00, 0.00, 0.001, 0.000), 2, byrow = TRUE)
 
 df$obs[df$y7 >= 1] <- 7
 df$obs[df$y7 < 1] <-  0
@@ -309,7 +309,6 @@ df$posterior[df$posterior >= 0.5] <- "Healthy"
 df$posterior[df$posterior < 0.5] <- "Failure"
 
 
-
 ### Plot predictions with true sequence
 p1 <- ggplot(aes(x = seq_along(df$date)), data = df) +
   geom_point(aes(y = df$state)) + 
@@ -327,7 +326,6 @@ p3 <- ggplot(aes(x = seq_along(df$date)), data = df) +
   xlab("Dice Roll (in sequence)") + ylab("State") +
   ggtitle("Posterior Predictions")
 
-grid.arrange(p1, p2, p3, ncol = 1)
 
 
 ## plot of graph
@@ -340,33 +338,43 @@ x_range <- range(0, 840)
 nSim = length(df$state)
 xlb = "Time (in hours)"
 ylb = "# of error sequence"
-plot(df$errseq, ylim=c(-1,7), xlim=x_range, xlab=xlb, ylab=ylb, xaxt="n" ,pch=3, bty="n")
-#lines(x, df$seq, lwd=1, col="black")
-axis(2,at=1:7)
-readline("Simulated, when failure was occured:\n")
-text(0,-1.2,adj=0,cex=.8,col="black","Actual Failure State")
-j =1
-failure = rep(c(0:10))
+plot(NULL, ylim=c(-12.5,20), xlim=x_range, xlab=xlb, ylab=ylb, xaxt="n" ,pch=3, bty="n")
+lines(x, df$seq, lwd=1, col="black")
+axis(2,at=1:30)
+
+
+readline("Actual Failure State:\n")
+text(0,-1,cex=.8,col="black",labels = "Predicted Failure State")
 for(i in 1:nSim)
 {
-  if(df$statev[i] == 0)  ## Healthy
-    rect(i,-1,i+1,0, col = "gray", border = NA)
-  else{ 
-    rect(i,-1,i+1,0, col = "black", border = NA)   
-    failure[j]=i
-    j = j+1
-  }
+  if(df$state[i] == "Failure")
+    rect(i,-4,i+1,-2, col = "black", border = NA)
+  else
+    rect(i,-4,i+1,-2, col = "grey", border = NA)   
 }
 
-readline("Prediction (viterbi):\n")
-text(0,-3.2,adj=0,cex=.8,col="black","Predicted Failure State")
+readline("Predicted Failure State (viterbi):\n")
+text(0,-3.2,adj=0,cex=.8,col="black", labels = "Predicted Failure State")
 for(i in 1:nSim)
 { 
   if(df$viterbi[i] == "Failure")
-    rect(i,-3,i+1,-2, col = "blue", border = NA)
+    rect(i,-8,i+1,-5, col = "red", border = NA)
   else
-    rect(i,-3,i+1,-2, col = "red", border = NA)  
+    rect(i,-8,i+1,-5, col = "grey", border = NA)  
 }
+
+readline("Error in Prediction:\n")
+text(0,-5.2,adj=0,cex=.8,col="black","Error in Prediction")
+differing = !(df$state == df$viterbi)
+for(i in 1:nSim)
+{
+  if(differing[i])
+    rect(i,-12,i+1,-9, col = rgb(.3, .3, .3), border = NA)
+  else
+    rect(i,-12,i+1,-9, col = rgb(.9, .9, .9), border = NA)  
+}
+
+
 dev.off()
 
 

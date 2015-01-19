@@ -157,7 +157,7 @@ backward = function(hmm, observation)
 dishonestCasino = function()
 {
   # setup HMM
-  nSim          = 2000
+  nSim          = 500
   States        = c("Fair","Unfair")
   Symbols       = 1:6 #c("1er","2er","3er","4er","5er","6er")
   transProbs    = matrix(c(.99,.01,.02,.98), c(length(States),length(States)), byrow=TRUE)
@@ -180,7 +180,7 @@ dishonestCasino = function()
   mn = "Fair and unfair die"
   xlb = "Throw nr."
   ylb = ""
-  plot(x$sim$observation,ylim=c(-7.5,6),pch=3,main=mn,xlab=xlb,ylab=ylb,bty="n",yaxt="n")
+  plot(x$sim$observation,ylim=c(-7.5,6),pch=3,main="Fair and unfair die",xlab=xlb,ylab=ylb,bty="n",yaxt="n")
   axis(2,at=1:6)
 
   readline("Simulated, which die was used:\n")
