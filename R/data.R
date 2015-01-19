@@ -262,7 +262,7 @@ library(HMM)
 TPM <- matrix(c(.95, .05, 
                 .1, .9), 2, byrow = TRUE)
 EPM <- matrix(c(0.00, 0.02, 0.02, 0.02, 0.02, 0.02, 0.99,
-                1, 0.00, 0.00, 0.00, 0.00, 0.001, 0.000), 2, byrow = TRUE)
+                0.99, 0.01, 0.02, 0.01, 0.00, 0.001, 0.001), 2, byrow = TRUE)
 
 df$obs[df$y7 >= 1] <- 7
 df$obs[df$y7 < 1] <-  0
@@ -329,7 +329,7 @@ p3 <- ggplot(aes(x = seq_along(df$date)), data = df) +
 
 
 ## plot of graph
-pdf("graph/failurePredictionN.pdf",bg="white")
+#pdf("graph/failurePredictionN.pdf",bg="white")
 readline("Plot simulated failure:\n")
 x <- seq_along(df$date)
 y <- df$statev
@@ -338,42 +338,41 @@ x_range <- range(0, 840)
 nSim = length(df$state)
 xlb = "Time (in hours)"
 ylb = "# of error sequence"
-plot(NULL, ylim=c(-12.5,20), xlim=x_range, xlab=xlb, ylab=ylb, xaxt="n" ,pch=3, bty="n")
+plot(NULL, ylim=c(-15.5,20), xlim=x_range, xlab=xlb, ylab=ylb, xaxt="n" ,pch=3, bty="n")
 lines(x, df$seq, lwd=1, col="black")
 axis(2,at=1:30)
 
-
 readline("Actual Failure State:\n")
-text(0,-1,cex=.8,col="black",labels = "Predicted Failure State")
+text(440,-1.4,cex=.8,col="black", pos=4, labels = "Actual Failure State")
 for(i in 1:nSim)
 {
   if(df$state[i] == "Failure")
-    rect(i,-4,i+1,-2, col = "black", border = NA)
+    rect(i,-5,i+1,-2, col = "black", border = NA)
   else
-    rect(i,-4,i+1,-2, col = "grey", border = NA)   
+    rect(i,-5,i+1,-2, col = "grey", border = NA)   
 }
 
 readline("Predicted Failure State (viterbi):\n")
-text(0,-3.2,adj=0,cex=.8,col="black", labels = "Predicted Failure State")
+text(440,-6.4,cex=.8,col="black", pos=4, labels = "Predicted Failure State")
 for(i in 1:nSim)
 { 
   if(df$viterbi[i] == "Failure")
-    rect(i,-8,i+1,-5, col = "red", border = NA)
+    rect(i,-10,i+1,-7, col = "red", border = NA)
   else
-    rect(i,-8,i+1,-5, col = "grey", border = NA)  
+    rect(i,-10,i+1,-7, col = "grey", border = NA)  
 }
 
 readline("Error in Prediction:\n")
-text(0,-5.2,adj=0,cex=.8,col="black","Error in Prediction")
+text(440,-11.4,cex=.8, col="black",pos=4, labels ="Error in Prediction")
 differing = !(df$state == df$viterbi)
 for(i in 1:nSim)
 {
   if(differing[i])
-    rect(i,-12,i+1,-9, col = rgb(.3, .3, .3), border = NA)
+    rect(i,-15,i+1,-12, col = rgb(.3, .3, .3), border = NA)
   else
-    rect(i,-12,i+1,-9, col = rgb(.9, .9, .9), border = NA)  
+    rect(i,-15,i+1,-12, col = rgb(.9, .9, .9), border = NA)  
 }
-
+axis(1, col = "black", col.axis = "black", lwd = 2)
 
 dev.off()
 
