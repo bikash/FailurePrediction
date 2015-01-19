@@ -97,29 +97,31 @@ getData = function(merge=TRUE, hour=FALSE)
 
 ## function to get raw data
 ## @param merge: if True merge all the data from different cluster
-getrawData = function(pivot =TRUE)
+getrawData = function()
 {
     ## Fill empty slot with unfailure data
-    len = length(df$date)
+    #len = length(df$date)
     #tseq <- seq(as.POSIXlt(df$date[1], origin="1970-01-01"), as.POSIXlt(df$date[len], origin="1970-01-01"), by="secs")
-    tseq <- seq(as.POSIXlt(1415724101, origin="1970-01-01"), as.POSIXlt(1417413321, origin="1970-01-01"), by="secs")
+    tseq <- seq(as.POSIXlt(1415724101, origin="1970-01-01"), as.POSIXlt(1417413321, origin="1970-01-01"), by="days")
     tseq=as.numeric(as.POSIXct(tseq))
     error = 7
     data.nonerror <- data.frame(tseq,error)
     ## Merge all data 
-    date = unlist(list(Data1$date, Data2$date, Data3$date, Data4$date, Data5$date,Data6$date, Data7$date,tseq))
-    error = unlist(list(Data1$ErrorType,Data2$ErrorType,Data3$ErrorType,Data4$ErrorType,Data5$ErrorType, Data6$ErrorType, Data7$ErrorType,data.nonerror$error))
+    date = unlist(list(Data1$date, Data2$date, Data3$date, Data4$date, Data5$date,Data6$date, Data7$date, tseq))
+    error = unlist(list(Data1$ErrorType,Data2$ErrorType,Data3$ErrorType,Data4$ErrorType,Data5$ErrorType, Data6$ErrorType, Data7$ErrorType, data.nonerror$error))
     
+    #data.errorType <- data.frame(date[1:10000],error[1:10000])
     data.errorType <- data.frame(date,error)
     ## Summing or grouping data of similar date
     #rawData <- by(error,date,function(x)paste(x,collapse=","))
+    cols <- c("date","error")
+    colnames( data.errorType) <- cols
     dt <- data.table(data.errorType )
-    #rawData = dt[,paste(error,collapse=","),by=date]
-    if(pivot)
+    #if(pivot)
       rawData = dcast(dt, date ~ dt$error, fun.aggregate = sum, value.var = "error") 
-    else
-      rawData = df
-    #rawData = dt[,paste(error,collapse=","),by=date]
+    #else
+      #rawData = data.errorType
+    
     return (rawData)
 }
 
@@ -177,12 +179,141 @@ PloterrorType <- function ()
 }
 
 
+getDataHr <-function()
+{
+  ##Plot number of observation Error Vs time
+  Data1 = read.table("file/error_25.txt", 
+                     sep=";", 
+                     col.names=c("date",  "status", "ErrorType", "Node"), 
+                     fill=FALSE, 
+                     strip.white=TRUE)
+  Data1$hour <- cut(as.POSIXlt( Data1$date,  origin="1970-01-01" ), breaks = "hour")
+  getcount <- function(Df) { c(count = as.numeric(length(Df$ErrorType)),
+                               obs = paste(Df$ErrorType, collapse=","))  
+  }
+  ts1 <- ddply(Data1, .(hour),getcount)
 
-df = getrawData()
+  ## d data from haisen22
+  Data6 = read.table("file/error_22.txt", 
+                     sep=";", 
+                     col.names=c("date",  "status", "ErrorType", "Node"), 
+                     fill=FALSE, 
+                     strip.white=TRUE)
+  Data6$hour <- cut(as.POSIXlt( Data6$date,  origin="1970-01-01" ), breaks = "hour")
+  ts6 <- ddply(Data6, .(hour),getcount)
+  
+  
+  ## d data from haisen20
+  Data7 = read.table("file/error_20.txt", 
+                     sep=";", 
+                     col.names=c("date",  "status", "ErrorType", "Node"), 
+                     fill=FALSE, 
+                     strip.white=TRUE)
+  Data7$hour <- cut(as.POSIXlt( Data7$date,  origin="1970-01-01" ), breaks = "hour")
+  ts7 <- ddply(Data7, .(hour),getcount)
+  
+  
+  tseq <- seq(as.POSIXlt(1415724101, origin="1970-01-01"), as.POSIXlt(1417413321, origin="1970-01-01"), by="hours")
+  tseq=as.numeric(as.POSIXct(tseq))
+  error = 7
+  data.nonerror <- data.frame(tseq,error)
+  ## Merge all data 
+  date = unlist(list(Data1$date, Data6$date, Data7$date, tseq))
+  error = unlist(list(Data1$ErrorType, Data6$ErrorType, Data7$ErrorType, data.nonerror$error))
+  data.errorType <- data.frame(date,error)
+  ## Summing or grouping data of similar date
+  #cols <- c("date","error")
+  #colnames( data.errorType) <- cols
+  dt <- data.table(data.errorType )
+  rawData = dcast(dt, date ~ dt$error, fun.aggregate = sum, value.var = "error") 
+  
+  return (rawData)
+  
+}
+## Print healthy and failure state
+df = getDataHr()
 ## Change column name
 cols <- c("date","y1","y2","y3","y4","y5","y6","y7") ## error 1 to 6 and 7 is non error event
 colnames(df) <- cols
 ## Plot Error observation
+df$state[df$y1 >= 1] <- "Failure"
+df$state[df$y1 < 1] <-  "Healthy"
+
+## observation
+df$statev[df$y1 >= 1] <- 1
+df$statev[df$y1 < 1] <-  0
+
+
+x <- seq_along(df$date)
+y <- df$statev
+g_range <- range(0, 1)
+x_range <- range(0, 840)
+plot(NULL, ylim=g_range, xlim=x_range, xlab="Date", ylab="State", xaxt="n")
+points(x, df$state, lwd=1, col="red")
+
+## plot graph for failure and healthy
+ggplot(aes(x = seq_along(df$date)), data = df) +
+  geom_point(aes(y = df$state)) + 
+  ylab("State") + xlab("Time (In hr)") + ylab("State") +
+  ggtitle("Actual Results")
+
+library(HMM)
+#Define HMM Model
+TPM <- matrix(c(.95, .05, 
+                .1, .9), 2, byrow = TRUE)
+EPM <- matrix(c(0.01, 0.02, 0.02, 0.02, 0.02, 0.02, 0.99,
+                0.99, 0.01, 0.03, 0.03, 0.03, 0.001, 0.009), 2, byrow = TRUE)
+
+df$obs[df$y7 >= 1] <- 7
+df$obs[df$y7 < 1] <-  0
+df$obs[df$y1 >= 1] <- 1
+df$obs[df$y2 >= 1] <- 2
+df$obs[df$y3 >= 1] <- 3
+df$obs[df$y4 >= 1] <- 4
+df$obs[df$y5 >= 1] <- 5
+df$obs[df$y6 >= 1] <- 6
+
+### Modeling
+# Create hmm using our TPM/EPM
+hmm <- initHMM(c("Healthy", "Failure"), c(1, 2, 3, 4, 5, 6, 7),
+               transProbs = TPM, emissionProbs = EPM)
+# Pull in results from the simulation
+obs <- df$obs
+# Save Viterbi/Posterior predictions as a new column
+df$viterbi <- viterbi(hmm, obs)
+df$posterior <- posterior(hmm, obs)[1, ]
+df$posterior[df$posterior >= 0.5] <- "Healthy"
+df$posterior[df$posterior < 0.5] <- "Failure"
+
+
+
+### Plot predictions with true sequence
+p1 <- ggplot(aes(x = seq_along(df$date)), data = df) +
+  geom_point(aes(y = df$state)) + 
+  ylab("State") + xlab("Time (In hr)") + ylab("State") +
+  ggtitle("Actual Results")
+
+p2 <- ggplot(aes(x = seq_along(df$date)), data = df) +
+  geom_point(aes(y = df$state), color = "#F8766D") + 
+  geom_point(aes(y = df$viterbi), color = "#00BFC4") +
+  xlab("Dice Roll (In Sequence)") + ylab("State") +
+  ggtitle("Viterbi Predictions")
+
+p3 <- ggplot(aes(x = seq_along(df$date)), data = df) +
+  geom_point(aes(y = df$state), color = "#F8766D") + 
+  geom_point(aes(y = df$posterior), color = "#00BFC4") +
+  xlab("Dice Roll (in sequence)") + ylab("State") +
+  ggtitle("Posterior Predictions")
+
+grid.arrange(p1, p2, p3, ncol = 1)
+
+
+x <- seq_along(df$date)
+y <- df$statev
+g_range <- range(0, 1)
+x_range <- range(0, 840)
+plot(NULL, ylim=g_range, xlim=x_range, xlab="Date", ylab="State", xaxt="n")
+lines(x, y, lwd=1, col="red")
 
 ### model HMM
 
