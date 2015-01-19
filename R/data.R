@@ -262,7 +262,7 @@ library(HMM)
 TPM <- matrix(c(.95, .05, 
                 .1, .9), 2, byrow = TRUE)
 EPM <- matrix(c(0.00, 0.02, 0.02, 0.02, 0.02, 0.02, 0.99,
-                0.99, 0.01, 0.02, 0.01, 0.00, 0.001, 0.001), 2, byrow = TRUE)
+                0.99, 0.01, 0.01, 0.01, 0.00, 0.001, 0.001), 2, byrow = TRUE)
 
 df$obs[df$y7 >= 1] <- 7
 df$obs[df$y7 < 1] <-  0
@@ -338,12 +338,12 @@ x_range <- range(0, 840)
 nSim = length(df$state)
 xlb = "Time (in hours)"
 ylb = "# of error sequence"
-plot(NULL, ylim=c(-15.5,20), xlim=x_range, xlab=xlb, ylab=ylb, xaxt="n" ,pch=3, bty="n")
+plot(NULL, ylim=c(-15.5,20), xlim=x_range, xlab=xlb, ylab=ylb, xaxt="n" ,pch=3, bty="n", axes=FALSE)
 lines(x, df$seq, lwd=1, col="black")
-axis(2,at=1:30)
+#axis(2,at=1:30)
 
 readline("Actual Failure State:\n")
-text(440,-1.4,cex=.8,col="black", pos=4, labels = "Actual Failure State")
+text(410,-1.4,cex=.8,col="black", pos=4, labels = "Actual Failure State")
 for(i in 1:nSim)
 {
   if(df$state[i] == "Failure")
@@ -353,7 +353,7 @@ for(i in 1:nSim)
 }
 
 readline("Predicted Failure State (viterbi):\n")
-text(440,-6.4,cex=.8,col="black", pos=4, labels = "Predicted Failure State")
+text(410,-6.4,cex=.8,col="black", pos=4, labels = "Predicted Failure State")
 for(i in 1:nSim)
 { 
   if(df$viterbi[i] == "Failure")
@@ -363,7 +363,7 @@ for(i in 1:nSim)
 }
 
 readline("Error in Prediction:\n")
-text(440,-11.4,cex=.8, col="black",pos=4, labels ="Error in Prediction")
+text(410,-11.4,cex=.8, col="black",pos=4, labels ="Error in Prediction")
 differing = !(df$state == df$viterbi)
 for(i in 1:nSim)
 {
@@ -373,6 +373,7 @@ for(i in 1:nSim)
     rect(i,-15,i+1,-12, col = rgb(.9, .9, .9), border = NA)  
 }
 axis(1, col = "black", col.axis = "black", lwd = 2)
+axis(2, 0:20, col = "black", col.axis = "black", lwd = 2)
 
 dev.off()
 
