@@ -273,6 +273,29 @@ df$obs[df$y4 >= 1] <- 4
 df$obs[df$y5 >= 1] <- 5
 df$obs[df$y6 >= 1] <- 6
 
+## Calcualte no of observation
+for(i in 1:length(df$state))
+{
+     df$seq[i] = df$y1[i]+df$y2[i]+df$y3[i]+df$y4[i]+df$y5[i]+df$y6[i]
+}
+## observation for error sequen
+for(i in 1:length(df$state))
+{
+  if(df$y1[i]>0)
+    df$errseq[i] = 1
+  else if(df$y2[i]>0)
+  df$errseq[i] = 2
+  else if(df$y3[i]>0)
+    df$errseq[i] = 3
+  else if(df$y4[i]>0)
+    df$errseq[i] = 4
+  else if(df$y5[i]>0)
+    df$errseq[i] = 5
+  else if(df$y6[i]>0)
+    df$errseq[i] = 6
+  else
+    df$errseq[i] = 7
+}
 ### Modeling
 # Create hmm using our TPM/EPM
 hmm <- initHMM(c("Healthy", "Failure"), c(1, 2, 3, 4, 5, 6, 7),
@@ -290,8 +313,7 @@ df$posterior[df$posterior < 0.5] <- "Failure"
 ### Plot predictions with true sequence
 p1 <- ggplot(aes(x = seq_along(df$date)), data = df) +
   geom_point(aes(y = df$state)) + 
-  ylab("State") + xlab("Time (In hr)") + ylab("State") +
-  ggtitle("Actual Results")
+  ylab("State") + xlab("Time (In hour)") + ylab("States")
 
 p2 <- ggplot(aes(x = seq_along(df$date)), data = df) +
   geom_point(aes(y = df$state), color = "#F8766D") + 
@@ -308,12 +330,47 @@ p3 <- ggplot(aes(x = seq_along(df$date)), data = df) +
 grid.arrange(p1, p2, p3, ncol = 1)
 
 
+## plot of graph
+pdf("graph/failurePredictionN.pdf",bg="white")
+readline("Plot simulated failure:\n")
 x <- seq_along(df$date)
 y <- df$statev
-g_range <- range(0, 1)
+y_range <- range(0, 40)
 x_range <- range(0, 840)
-plot(NULL, ylim=g_range, xlim=x_range, xlab="Date", ylab="State", xaxt="n")
-lines(x, y, lwd=1, col="red")
+nSim = length(df$state)
+xlb = "Time (in hours)"
+ylb = "# of error sequence"
+plot(df$errseq, ylim=c(-1,7), xlim=x_range, xlab=xlb, ylab=ylb, xaxt="n" ,pch=3, bty="n")
+#lines(x, df$seq, lwd=1, col="black")
+axis(2,at=1:7)
+readline("Simulated, when failure was occured:\n")
+text(0,-1.2,adj=0,cex=.8,col="black","Actual Failure State")
+j =1
+failure = rep(c(0:10))
+for(i in 1:nSim)
+{
+  if(df$statev[i] == 0)  ## Healthy
+    rect(i,-1,i+1,0, col = "gray", border = NA)
+  else{ 
+    rect(i,-1,i+1,0, col = "black", border = NA)   
+    failure[j]=i
+    j = j+1
+  }
+}
+
+readline("Prediction (viterbi):\n")
+text(0,-3.2,adj=0,cex=.8,col="black","Predicted Failure State")
+for(i in 1:nSim)
+{ 
+  if(df$viterbi[i] == "Failure")
+    rect(i,-3,i+1,-2, col = "blue", border = NA)
+  else
+    rect(i,-3,i+1,-2, col = "red", border = NA)  
+}
+dev.off()
+
+
+
 
 ### model HMM
 
