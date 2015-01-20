@@ -230,6 +230,9 @@ getDataHr <-function()
   return (rawData)
   
 }
+
+PredictionGraph <- function()
+{
 ## Print healthy and failure state
 df = getDataHr()
 ## Change column name
@@ -344,12 +347,18 @@ lines(x, df$seq, lwd=1, col="black")
 
 readline("Actual Failure State:\n")
 text(410,-1.4,cex=.8,col="black", pos=4, labels = "Actual Failure State")
+j =1
+failure = rep(c(0:10))
 for(i in 1:nSim)
 {
   if(df$state[i] == "Failure")
+  {
     rect(i,-5,i+1,-2, col = "black", border = NA)
+    failure[j]=i
+    j = j+1
+  }
   else
-    rect(i,-5,i+1,-2, col = "grey", border = NA)   
+    rect(i,-5,i+1,-2, col = "grey", border = NA) 
 }
 
 readline("Predicted Failure State (viterbi):\n")
@@ -375,10 +384,25 @@ for(i in 1:nSim)
 axis(1, col = "black", col.axis = "black", lwd = 2)
 axis(2, 0:20, col = "black", col.axis = "black", lwd = 2)
 
+#dev.off()
+}
+
+PredictionGraph()
+
+pdf("graph/failurehist.pdf",bg="white")
+##Plot histogram for time between failures (TBF)
+len = length(failure)
+j = 1
+failure1 = rep(c(0:10))
+for(i in 2:len)
+{
+  failure1[j] = failure[i] - failure[i-1]
+  j = j+1
+}
+failure1[len]= 10
+hidden.states = x$sim$states ##1 healthy and 2 failure
+hist(failure1, freq=FALSE, main="", xlab = "Time Between Failure (hour)", density = 10, angle = 45)
 dev.off()
-
-
-
 
 ### model HMM
 
