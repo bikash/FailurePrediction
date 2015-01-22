@@ -259,59 +259,6 @@ ggplot(aes(x = seq_along(df$date)), data = df) +
   geom_point(aes(y = df$state)) + 
   ylab("State") + xlab("Time (In hr)") + ylab("State") +
   ggtitle("Actual Results")
-
-library(HMM)
-#Define HMM Model
-TPM <- matrix(c(.95, .05, 
-                .1, .9), 2, byrow = TRUE)
-EPM <- matrix(c(0.00, 0.02, 0.02, 0.02, 0.02, 0.02, 0.99,
-                0.99, 0.01, 0.01, 0.01, 0.00, 0.001, 0.001), 2, byrow = TRUE)
-
-df$obs[df$y7 >= 1] <- 7
-df$obs[df$y7 < 1] <-  0
-df$obs[df$y1 >= 1] <- 1
-df$obs[df$y2 >= 1] <- 2
-df$obs[df$y3 >= 1] <- 3
-df$obs[df$y4 >= 1] <- 4
-df$obs[df$y5 >= 1] <- 5
-df$obs[df$y6 >= 1] <- 6
-
-## Calcualte no of observation
-for(i in 1:length(df$state))
-{
-     df$seq[i] = df$y1[i]+df$y2[i]+df$y3[i]+df$y4[i]+df$y5[i]+df$y6[i]
-}
-## observation for error sequen
-for(i in 1:length(df$state))
-{
-  if(df$y1[i]>0)
-    df$errseq[i] = 1
-  else if(df$y2[i]>0)
-  df$errseq[i] = 2
-  else if(df$y3[i]>0)
-    df$errseq[i] = 3
-  else if(df$y4[i]>0)
-    df$errseq[i] = 4
-  else if(df$y5[i]>0)
-    df$errseq[i] = 5
-  else if(df$y6[i]>0)
-    df$errseq[i] = 6
-  else
-    df$errseq[i] = 7
-}
-### Modeling
-# Create hmm using our TPM/EPM
-hmm <- initHMM(c("Healthy", "Failure"), c(1, 2, 3, 4, 5, 6, 7),
-               transProbs = TPM, emissionProbs = EPM)
-# Pull in results from the simulation
-obs <- df$obs
-# Save Viterbi/Posterior predictions as a new column
-df$viterbi <- viterbi(hmm, obs)
-df$posterior <- posterior(hmm, obs)[1, ]
-df$posterior[df$posterior >= 0.5] <- "Healthy"
-df$posterior[df$posterior < 0.5] <- "Failure"
-
-
 ### Plot predictions with true sequence
 p1 <- ggplot(aes(x = seq_along(df$date)), data = df) +
   geom_point(aes(y = df$state)) + 
@@ -328,6 +275,59 @@ p3 <- ggplot(aes(x = seq_along(df$date)), data = df) +
   geom_point(aes(y = df$posterior), color = "#00BFC4") +
   xlab("Dice Roll (in sequence)") + ylab("State") +
   ggtitle("Posterior Predictions")
+
+library(HMM)
+#Define HMM Model
+TPM <- matrix(c(.95, .05, 
+                .1, .9), 2, byrow = TRUE)
+EPM <- matrix(c(0.00, 0.02, 0.02, 0.02, 0.02, 0.02, 0.99,
+                0.99, 0.01, 0.01, 0.01, 0.00, 0.001, 0.001), 2, byrow = TRUE)
+
+
+### Modeling
+# Create hmm using our TPM/EPM
+hmm <- initHMM(c("Healthy", "Failure"), c(1, 2, 3, 4, 5, 6, 7),
+               transProbs = TPM, emissionProbs = EPM)
+# Pull in results from the simulation
+obs <- df$obs
+# Save Viterbi/Posterior predictions as a new column
+df$viterbi <- viterbi(hmm, obs)
+hmmFit = baumWelch(hmm, obs) 
+
+load.packages('RHmm')
+df$obs[df$y7 >= 1] <- 7
+df$obs[df$y7 < 1] <-  0
+df$obs[df$y1 >= 1] <- 1
+df$obs[df$y2 >= 1] <- 2
+df$obs[df$y3 >= 1] <- 3
+df$obs[df$y4 >= 1] <- 4
+df$obs[df$y5 >= 1] <- 5
+df$obs[df$y6 >= 1] <- 6
+
+## Calcualte no of observation
+for(i in 1:length(df$state))
+{
+  df$seq[i] = df$y1[i]+df$y2[i]+df$y3[i]+df$y4[i]+df$y5[i]+df$y6[i]
+}
+## observation for error sequen
+for(i in 1:length(df$state))
+{
+  if(df$y1[i]>0)
+    df$errseq[i] = 1
+  else if(df$y2[i]>0)
+    df$errseq[i] = 2
+  else if(df$y3[i]>0)
+    df$errseq[i] = 3
+  else if(df$y4[i]>0)
+    df$errseq[i] = 4
+  else if(df$y5[i]>0)
+    df$errseq[i] = 5
+  else if(df$y6[i]>0)
+    df$errseq[i] = 6
+  else
+    df$errseq[i] = 7
+}
+
 
 
 
@@ -400,9 +400,11 @@ for(i in 2:len)
   j = j+1
 }
 failure1[len]= 10
-hidden.states = x$sim$states ##1 healthy and 2 failure
 hist(failure1, freq=FALSE, main="", xlab = "Time Between Failure (hour)", density = 10, angle = 45)
+
 dev.off()
 
-### model HMM
-
+### Autocorrelation of Failure occurence
+pdf("graph/acf_failure.pdf",bg="white")
+acf(df$statev, xlab="Lag (hours)", main="")
+dev.off()
