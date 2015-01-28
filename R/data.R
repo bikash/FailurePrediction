@@ -8,8 +8,8 @@ library(reshape2)
 library(xts)
 library(data.table)
 library(reshape)
-#dir = "/Users/bikash/repos/FailurePrediction/R" # path for macbots1ok
-dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
+dir = "/Users/bikash/repos/FailurePrediction/R" # path for macbots1ok
+#dir = "/home/bikash/repos/FailurePrediction/R" # path in linux machine
 setwd(dir)
 ##Plot number of observation Error Vs time
 Data1 = read.table("file/error_25.txt", 
@@ -153,7 +153,7 @@ PloterrorType <- function ()
   pdf("graph/toe.pdf",bg="white")
   df = matrix(c(ErrorType$a1, ErrorType$a2, ErrorType$a3, ErrorType$a4, ErrorType$a5, ErrorType$a6),
               nrow=length(ErrorType$day), ncol=6, 
-              dimnames=list(ErrorType$day, c( "Error 1","Error 2", "Error 3", "Error 4", "Error 5", "Error 6")))
+              dimnames=list(ErrorType$day, c( "Error1","Error2", "Error3", "Error4", "Error5", "Error6")))
   
   df1 = t(df)                                       
   # SIMPLE BARPLOT
@@ -170,7 +170,7 @@ PloterrorType <- function ()
           font.lab=3)                             # Font to use for the axis labels: 1=plain text, 2=bold, 3=italic, 4=bold italic
   
   legend("topright",                               # Add a legend to the plot
-         legend=c( "Network connection","Memory overflow", "Security setting", "Java exception", "Java I/O error", "Namenode failure"),             # Text for the legend
+         legend=c( "Network connection","Memory overflow", "Security setting", "Unknown", "Java I/O error", "Namenode failure"),             # Text for the legend
          density=c(90, 70, 50, 40, 30, 20),
          #fill=c( "white","black",  "gray", "red","green","blue")
          )  
@@ -276,12 +276,22 @@ p3 <- ggplot(aes(x = seq_along(df$date)), data = df) +
   xlab("Dice Roll (in sequence)") + ylab("State") +
   ggtitle("Posterior Predictions")
 
+load.packages('RHmm')
+df$obs[df$y7 >= 1] <- 7
+df$obs[df$y7 < 1] <-  0
+df$obs[df$y1 >= 1] <- 1
+df$obs[df$y2 >= 1] <- 2
+df$obs[df$y3 >= 1] <- 3
+df$obs[df$y4 >= 1] <- 4
+df$obs[df$y5 >= 1] <- 5
+df$obs[df$y6 >= 1] <- 6
+
 library(HMM)
 #Define HMM Model
 TPM <- matrix(c(.95, .05, 
                 .1, .9), 2, byrow = TRUE)
-EPM <- matrix(c(0.00, 0.02, 0.02, 0.02, 0.02, 0.02, 0.99,
-                0.99, 0.01, 0.01, 0.01, 0.00, 0.001, 0.001), 2, byrow = TRUE)
+EPM <- matrix(c(0.000, 0.02, 0.02, 0.02, 0.02, 0.02, 0.99,
+                0.98, 0.01, 0.01, 0.01, 0.00, 0.001, 0.001), 2, byrow = TRUE)
 
 
 ### Modeling
@@ -292,17 +302,11 @@ hmm <- initHMM(c("Healthy", "Failure"), c(1, 2, 3, 4, 5, 6, 7),
 obs <- df$obs
 # Save Viterbi/Posterior predictions as a new column
 df$viterbi <- viterbi(hmm, obs)
-hmmFit = baumWelch(hmm, obs) 
+#hmmFit = baumWelch(hmm, obs) 
 
-load.packages('RHmm')
-df$obs[df$y7 >= 1] <- 7
-df$obs[df$y7 < 1] <-  0
-df$obs[df$y1 >= 1] <- 1
-df$obs[df$y2 >= 1] <- 2
-df$obs[df$y3 >= 1] <- 3
-df$obs[df$y4 >= 1] <- 4
-df$obs[df$y5 >= 1] <- 5
-df$obs[df$y6 >= 1] <- 6
+## training sample
+df$state[1:150] = sample(c("Failure","Healthy"),150,T)
+
 
 ## Calcualte no of observation
 for(i in 1:length(df$state))
@@ -377,7 +381,7 @@ differing = !(df$state == df$viterbi)
 for(i in 1:nSim)
 {
   if(differing[i])
-    rect(i,-15,i+1,-12, col = rgb(.3, .3, .3), border = NA)
+    rect(i,-15,i+1,-12, col = "blue", border = NA)
   else
     rect(i,-15,i+1,-12, col = rgb(.9, .9, .9), border = NA)  
 }
