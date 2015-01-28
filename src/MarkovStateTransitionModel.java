@@ -34,9 +34,10 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import utils.tools.StateTransitionProbability;
 import org.chombo.util.Tuple;
 import org.chombo.util.Utility;
+
+import utils.tools.StateTransitionProbability;
 
 /**
  * Markov state transition probability matrix

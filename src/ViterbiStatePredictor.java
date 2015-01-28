@@ -6,8 +6,6 @@
 */
 
 
-
-
 import java.io.IOException;
 import java.util.List;
 
@@ -38,17 +36,30 @@ public class ViterbiStatePredictor extends Configured implements Tool {
 		
 		
         Job job = new Job(getConf());
+        
         String jobName = "Markov hidden state sequence predictor";
         job.setJobName(jobName);
         Configuration conf = job.getConfiguration();
+        //conf.set("fs.default.name", "hdfs://haisen20.ux.uis.no:8020/");
+        //conf.set("mapred.job.tracker", "haisen22.ux.uis.no:8021");
+        
+        //conf.set("conf.path","/home/ekstern/haisen/bikash/repos/FailurePrediction/jar/HMM.properties");
+        //conf.addResource(new Path("/usr/lib/hadoop/conf/core-site.xml"));
+        //conf.addResource(new Path("/usr/lib/hadoop/conf/hdfs-site.xml"));
+        //conf.addResource(new Path("/usr/lib/hadoop/conf/mapred-site.xml"));
+        //FileSystem fs = FileSystem.get(new URI("hdfs://localhost:8020"),conf);
+        
         conf.set("conf.path","/home/bikash/repos/FailurePrediction/jar/HMM.properties");
+        //conf.get("conf.path",new Path(args[2]));
+        
         job.setJarByClass(ViterbiStatePredictor.class);
 
         //FileInputFormat.addInputPath(job, new Path(args[0]));
         //FileOutputFormat.setOutputPath(job, new Path(args[1]));
-        FileInputFormat.setInputPaths(job, new Path("hdfs://localhost:9000/user/bikash/fd/out.txt"));
-    	FileOutputFormat.setOutputPath(job, new Path("hdfs://localhost:9000/user/bikash/fd/out/12"));
-
+        FileInputFormat.setInputPaths(job, new Path("hdfs://haisen20.ux.uis.no:8020/user/haisen/input/out.txt"));
+    	FileOutputFormat.setOutputPath(job, new Path("hdfs://haisen20.ux.uis.no:8020/user/haisen/fd/out/312"));
+        //FileInputFormat.setInputPaths(job, new Path("hdfs://localhost:9000/user/bikash/fd/out.txt"));
+    	//FileOutputFormat.setOutputPath(job, new Path("hdfs://localhost:9000/user/bikash/fd/out/226"));
         Utility.setConfiguration(conf, "HMM");
         job.setMapperClass(ViterbiStatePredictor.StatePredictionMapper.class);
 
@@ -56,8 +67,6 @@ public class ViterbiStatePredictor extends Configured implements Tool {
         job.setOutputValueClass(Text.class);
 
         job.setNumReduceTasks(0);
-        
- 
 
         int status =  job.waitForCompletion(true) ? 0 : 1;
         return status;

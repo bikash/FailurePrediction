@@ -26,7 +26,7 @@ public class ViterbiDecoder {
 	private static Logger LOG;
 	
 	/**
-	 * @p aram model
+	 * @param model
 	 */
 	public ViterbiDecoder(HiddenMarkovModel model, Logger LOG) {
 		ViterbiDecoder.LOG = LOG;

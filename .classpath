@@ -30,10 +30,5 @@
 	<classpathentry kind="lib" path="/home/bikash/builds/hadoop/lib/slf4j-log4j12-1.4.3.jar"/>
 	<classpathentry kind="lib" path="/home/bikash/builds/hadoop/lib/xmlenc-0.52.jar"/>
 	<classpathentry kind="lib" path="/home/bikash/repos/FailurePrediction/lib/aws-java-sdk-1.7.3.jar"/>
-	<classpathentry kind="lib" path="/Users/bikash/repos/FailurePrediction/lib/aws-java-sdk-1.7.3.jar"/>
-	<classpathentry kind="lib" path="/Users/bikash/repos/FailurePrediction/lib/chombo-1.0.jar"/>
-	<classpathentry kind="lib" path="/Users/bikash/repos/FailurePrediction/lib/commons-lang-2.5.jar"/>
-	<classpathentry kind="lib" path="/Users/bikash/repos/FailurePrediction/lib/hadoop-0.20.2-core.jar"/>
-	<classpathentry kind="lib" path="/Users/bikash/repos/FailurePrediction/lib/log4j-1.2.15.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
