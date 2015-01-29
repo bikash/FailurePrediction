@@ -47,6 +47,21 @@ public class ViterbiDecoder {
 	}
 	
 	/**
+	 * @param numObs
+	 */
+	public int getObs() {
+		return numObs;
+	}
+	
+	/**
+	 * set number of observation
+	 * @param numObs
+	 */
+	public void setObs(int numObs) {
+		this.numObs = numObs;
+		LOG.debug("numObs:" + numObs);
+	}
+	/**
 	 * process next observation
 	 * @param observation
 	 */
@@ -107,8 +122,10 @@ public class ViterbiDecoder {
 		//state at end of observation sequence
 		LOG.debug("state seq" );
 		maxPathProb = 0;
+		//System.out.println("numStates--> " + numStates);
 		for (int stateIndx = 0; stateIndx < numStates; ++stateIndx) {
 			//max path probability for the last observation
+			//System.out.println("numObs in --> " + numObs);
 			pathProb = statePathProb.get(numObs -1, stateIndx);
 			if (pathProb > maxPathProb) {
 				maxPathProb = pathProb;
@@ -119,6 +136,7 @@ public class ViterbiDecoder {
 		states[stateSeqIndx++] = model.getState(maxProbStateIndx);
 		nextStateIndx = maxProbStateIndx;
 		
+		//System.out.println("numObs--> " + numObs);
 		//backtrack for rest of the states going back ward
 		for (int obsIndx = numObs -1 ; obsIndx >= 1; --obsIndx) {
 			priorStateIndx = statePtr.get(obsIndx, nextStateIndx);

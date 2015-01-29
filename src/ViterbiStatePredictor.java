@@ -9,6 +9,8 @@
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
@@ -34,32 +36,31 @@ public class ViterbiStatePredictor extends Configured implements Tool {
 	@Override
 	public int run(String[] args) throws Exception {
 		
-		
+		Log LOG = LogFactory.getLog(ViterbiStatePredictor.class);
         Job job = new Job(getConf());
         
         String jobName = "Markov hidden state sequence predictor";
         job.setJobName(jobName);
         Configuration conf = job.getConfiguration();
-        //conf.set("fs.default.name", "hdfs://haisen20.ux.uis.no:8020/");
-        //conf.set("mapred.job.tracker", "haisen22.ux.uis.no:8021");
-        
-        //conf.set("conf.path","/home/ekstern/haisen/bikash/repos/FailurePrediction/jar/HMM.properties");
+        //conf.set("fs.default.name", "hdfs://localhost:9000");
+        //conf.set("mapred.job.tracker", "localhost:9001");
+        conf.set("conf.path","/home/ekstern/haisen/bikash/repos/FailurePrediction/jar/HMM.properties");
         //conf.addResource(new Path("/usr/lib/hadoop/conf/core-site.xml"));
         //conf.addResource(new Path("/usr/lib/hadoop/conf/hdfs-site.xml"));
         //conf.addResource(new Path("/usr/lib/hadoop/conf/mapred-site.xml"));
         //FileSystem fs = FileSystem.get(new URI("hdfs://localhost:8020"),conf);
         
-        conf.set("conf.path","/home/bikash/repos/FailurePrediction/jar/HMM.properties");
+        //conf.set("conf.path","/home/bikash/repos/FailurePrediction/jar/HMM.properties");
         //conf.get("conf.path",new Path(args[2]));
         
         job.setJarByClass(ViterbiStatePredictor.class);
 
-        //FileInputFormat.addInputPath(job, new Path(args[0]));
-        //FileOutputFormat.setOutputPath(job, new Path(args[1]));
-        FileInputFormat.setInputPaths(job, new Path("hdfs://haisen20.ux.uis.no:8020/user/haisen/input/out.txt"));
-    	FileOutputFormat.setOutputPath(job, new Path("hdfs://haisen20.ux.uis.no:8020/user/haisen/fd/out/312"));
-        //FileInputFormat.setInputPaths(job, new Path("hdfs://localhost:9000/user/bikash/fd/out.txt"));
-    	//FileOutputFormat.setOutputPath(job, new Path("hdfs://localhost:9000/user/bikash/fd/out/226"));
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        //FileInputFormat.setInputPaths(job, new Path("hdfs://haisen20.ux.uis.no:8020/user/haisen/input/out.txt"));
+    	//FileOutputFormat.setOutputPath(job, new Path("hdfs://haisen20.ux.uis.no:8020/user/haisen/fd/out/312"));
+        //FileInputFormat.setInputPaths(job, new Path("/user/bikash/input/fd"));
+    	//FileOutputFormat.setOutputPath(job, new Path("/user/bikash/fd/out/2"));
         Utility.setConfiguration(conf, "HMM");
         job.setMapperClass(ViterbiStatePredictor.StatePredictionMapper.class);
 
@@ -121,14 +122,21 @@ public class ViterbiStatePredictor extends Configured implements Tool {
         	System.out.println("ITEMS --> " + value.toString());
         	decoder.initialize(items.length - skipFieldCount);
         	
+        	int k = 0;
         	//build state sequence probability matrix and state pointer matrix
         	for (int i = skipFieldCount; i < items.length; ++i) {
-        		decoder.nextObservation(items[i]);
+        		//System.out.println("item --> " + items[i]);
+        		if(items[i] != null && !items[i].isEmpty())
+        			decoder.nextObservation(items[i]);
+        		else
+        			k++;
         	}
-        	
+        	int obs = items.length - skipFieldCount -k;
+        	//System.out.println("obser  --> " + obs);
+        	decoder.setObs(obs);
         	//state sequence
         	String[] states = decoder.getStateSequence(); // hidden states [N, L, N, H, H, H, N, L, N, L, N, L, L, N]
-        
+        	//System.out.println("item end --> " + states);
         	stBld.delete(0, stBld.length());
         	stBld.append(items[idFieldIndex]);
         	if (outputStateOnly) {
