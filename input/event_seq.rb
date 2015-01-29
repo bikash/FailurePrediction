@@ -6,12 +6,12 @@ custCount = ARGV[0].to_i
 events = ['1','2','3','4','5','6','7']
 
 
-idGen = 315586167
+timestampStart = 315586167
 open('myfile.txt', 'a') { |f|
 1.upto custCount do
-	idGen = idGen + 1
-	custID = idGen
-	num_events = 5 + rand(20)
+	timestampStart = timestampStart + 1
+	timestamp = timestampStart
+	num_events = 1 + rand(3)
 	cust_events = []
 	1.upto num_events do
 		indx = rand(events.size)
@@ -27,6 +27,6 @@ open('myfile.txt', 'a') { |f|
 		end
 	end
 	
-	f.puts "#{custID},#{cust_events.join(',')}"
+	f.puts "#{timestamp},#{cust_events.join(',')}"
 end
 }

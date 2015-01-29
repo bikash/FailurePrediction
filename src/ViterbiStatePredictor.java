@@ -105,8 +105,8 @@ public class ViterbiStatePredictor extends Configured implements Tool {
             idFieldIndex = conf.getInt("id.field.ordinal", 0);
             outputStateOnly = conf.getBoolean("output.state.only", true);
             subFieldDelim = conf.get("sub.field.delim", ":");
-            String subFieldDelim1 = conf.get("hmm.model.path", "");
-            System.out.println(subFieldDelim1);
+            //String subFieldDelim1 = conf.get("hmm.model.path", "");
+            //System.out.println(subFieldDelim1);
         	List<String> lines = Utility.getFileLines(conf, "hmm.model.path");
         	System.out.println(lines);
         	model = new HiddenMarkovModel(lines,  LOG);
@@ -119,7 +119,7 @@ public class ViterbiStatePredictor extends Configured implements Tool {
         protected void map(LongWritable key, Text value, Context context)
         		throws IOException, InterruptedException {
         	items  =  value.toString().split(fieldDelimRegex);
-        	System.out.println("ITEMS --> " + value.toString());
+        	//System.out.println("ITEMS --> " + value.toString());
         	decoder.initialize(items.length - skipFieldCount);
         	
         	int k = 0;
@@ -151,7 +151,7 @@ public class ViterbiStatePredictor extends Configured implements Tool {
 	        	}
         	}
         	outVal.set(stBld.toString()); //outVal  --> R9L63ZXYH9,L,L,N,N,L,L,L,L,L,H,H
-        	System.out.println("Prediction  --> " + outVal);
+        	//System.out.println("Prediction  --> " + outVal);
    			context.write(NullWritable.get(),outVal);
         }
         
