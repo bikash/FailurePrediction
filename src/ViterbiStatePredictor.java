@@ -36,7 +36,6 @@ public class ViterbiStatePredictor extends Configured implements Tool {
 	@Override
 	public int run(String[] args) throws Exception {
 		
-		Log LOG = LogFactory.getLog(ViterbiStatePredictor.class);
         Job job = new Job(getConf());
         
         String jobName = "Markov hidden state sequence predictor";
@@ -59,8 +58,8 @@ public class ViterbiStatePredictor extends Configured implements Tool {
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
         //FileInputFormat.setInputPaths(job, new Path("hdfs://haisen20.ux.uis.no:8020/user/haisen/input/out.txt"));
     	//FileOutputFormat.setOutputPath(job, new Path("hdfs://haisen20.ux.uis.no:8020/user/haisen/fd/out/312"));
-        //FileInputFormat.setInputPaths(job, new Path("/user/bikash/input/fd"));
-    	//FileOutputFormat.setOutputPath(job, new Path("/user/bikash/fd/out/2"));
+        //FileInputFormat.setInputPaths(job, new Path("/user/bikash/input/5"));
+    	//FileOutputFormat.setOutputPath(job, new Path("/user/bikash/fd/out/5"));
         Utility.setConfiguration(conf, "HMM");
         job.setMapperClass(ViterbiStatePredictor.StatePredictionMapper.class);
 
@@ -108,7 +107,8 @@ public class ViterbiStatePredictor extends Configured implements Tool {
             //String subFieldDelim1 = conf.get("hmm.model.path", "");
             //System.out.println(subFieldDelim1);
         	List<String> lines = Utility.getFileLines(conf, "hmm.model.path");
-        	System.out.println(lines);
+        	//System.out.println(lines);
+        	LOG.debug("lines :" + lines );
         	model = new HiddenMarkovModel(lines,  LOG);
         	decoder = new ViterbiDecoder(model, LOG);
         }
@@ -119,40 +119,44 @@ public class ViterbiStatePredictor extends Configured implements Tool {
         protected void map(LongWritable key, Text value, Context context)
         		throws IOException, InterruptedException {
         	items  =  value.toString().split(fieldDelimRegex);
+        	//System.out.println("ITEMS length--> " + items.length);
         	//System.out.println("ITEMS --> " + value.toString());
         	decoder.initialize(items.length - skipFieldCount);
-        	
-        	int k = 0;
-        	//build state sequence probability matrix and state pointer matrix
-        	for (int i = skipFieldCount; i < items.length; ++i) {
-        		//System.out.println("item --> " + items[i]);
-        		if(items[i] != null && !items[i].isEmpty())
-        			decoder.nextObservation(items[i]);
-        		else
-        			k++;
-        	}
-        	int obs = items.length - skipFieldCount -k;
-        	//System.out.println("obser  --> " + obs);
-        	decoder.setObs(obs);
-        	//state sequence
-        	String[] states = decoder.getStateSequence(); // hidden states [N, L, N, H, H, H, N, L, N, L, N, L, L, N]
-        	//System.out.println("item end --> " + states);
-        	stBld.delete(0, stBld.length());
-        	stBld.append(items[idFieldIndex]);
-        	if (outputStateOnly) {
-        		//states only
-	        	for (int i = states.length - 1; i >= 0; --i) {
-	        		stBld.append(fieldDelim).append(states[i]); //append , and make a string of hidden states
+        	//LOG.debug("ITEMS :" + value.toString() );
+        	if(items.length > 1)
+        	{
+	        	int k = 0;
+	        	//build state sequence probability matrix and state pointer matrix
+	        	for (int i = skipFieldCount; i < items.length; ++i) {
+	        		//System.out.println("item --> " + items[i]);
+	        		if(items[i] != null && !items[i].isEmpty())
+	        			decoder.nextObservation(items[i]);
+	        		else
+	        			k++;
 	        	}
-        	} else {
-        		//observation followed by state
-	        	for (int i = states.length - 1, j = skipFieldCount; i >= 0; --i, ++j) {
-	        		stBld.append(fieldDelim).append(items[j]).append(subFieldDelim).append(states[i]);
+	        	int obs = items.length - skipFieldCount -k;
+	        	//System.out.println("obser  --> " + obs);
+	        	decoder.setObs(obs);
+	        	//state sequence
+	        	String[] states = decoder.getStateSequence(); // hidden states [N, L, N, H, H, H, N, L, N, L, N, L, L, N]
+	        	//System.out.println("item end --> " + states);
+	        	stBld.delete(0, stBld.length());
+	        	stBld.append(items[idFieldIndex]);
+	        	if (outputStateOnly) {
+	        		//states only
+		        	for (int i = states.length - 1; i >= 0; --i) {
+		        		stBld.append(fieldDelim).append(states[i]); //append , and make a string of hidden states
+		        	}
+	        	} else {
+	        		//observation followed by state
+		        	for (int i = states.length - 1, j = skipFieldCount; i >= 0; --i, ++j) {
+		        		stBld.append(fieldDelim).append(items[j]).append(subFieldDelim).append(states[i]);
+		        	}
 	        	}
+	        	outVal.set(stBld.toString()); //outVal  --> R9L63ZXYH9,L,L,N,N,L,L,L,L,L,H,H
+	        	//System.out.println("Prediction  --> " + outVal);
+	   			context.write(NullWritable.get(),outVal);
         	}
-        	outVal.set(stBld.toString()); //outVal  --> R9L63ZXYH9,L,L,N,N,L,L,L,L,L,H,H
-        	//System.out.println("Prediction  --> " + outVal);
-   			context.write(NullWritable.get(),outVal);
         }
         
 	}	

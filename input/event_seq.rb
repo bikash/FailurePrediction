@@ -11,20 +11,12 @@ open('myfile.txt', 'a') { |f|
 1.upto custCount do
 	timestampStart = timestampStart + 1
 	timestamp = timestampStart
-	num_events = 1 + rand(3)
+	num_events = 1 + rand(2)
 	cust_events = []
 	1.upto num_events do
 		indx = rand(events.size)
 		ev = events[indx]
 		cust_events << ev
-		if (rand(10) < 3)
-			r = 1 + rand(3)
-			1.upto r do
-				indx = (indx / 3) * 3 + rand(2)
-				ev = events[indx]
-				cust_events << ev
-			end
-		end
 	end
 	
 	f.puts "#{timestamp},#{cust_events.join(',')}"
