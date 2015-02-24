@@ -63,10 +63,7 @@ Data6 = read.table("file/error_22.txt",
                    sep=";", 
                    col.names=c("date",  "status", "ErrorType", "Node"), 
                    fill=FALSE, 
-                   strip.white=TRUE)
-Data6$day <- cut(as.POSIXlt( Data6$date,  origin="1970-01-01" ), breaks = "day")
-ts6 <- ddply(Data6, .(day),getcount)
-
+       ts
 
 ## d data from haisen20
 Data7 = read.table("file/error_20.txt", 
